@@ -55,3 +55,29 @@
 - Finalidade: revisão do relatório, sugestões para a histerese e as colisões.
 - Resultado utilizado: o texto do relatório e do README, que uma vez revisto, foi corrigido
 - Decisões minhas: o sistema de níveis e moedas, o controlo por volume, os esboços feitos à mão e as correções ao texto.
+
+---
+
+## Sessão 3 – 8 de outubro de 2026
+
+**Objetivo:** Criar o esqueleto inicial do projeto p5.js no repositório.
+
+**Atividades realizadas:**
+- Criei o ficheiro `index.html` no repositório.
+- Criei o ficheiro `sketch.js` com o esqueleto inicial: função `setup()` (canvas de 800×600), função `draw()` com a variável `estado` ("inicio", "execucao" ou "resultado"), um ecrã de início que mostra só o título "REEF CLEANER" e o rodapé obrigatório (tema em baixo à esquerda; nome, n.º de aluno e ECGM em baixo à direita).
+
+**Problemas:**
+- O `index.html` ficou criado mas sem código lá dentro. Por isso o `sketch.js` ainda não é carregado e o jogo não corre no browser.
+
+**Solução:**
+- Ainda por resolver: preencher o `index.html` com as bibliotecas p5.js e p5.sound e a ligação ao `sketch.js`, e testar com o Live Server.
+
+**Decisões:**
+- Organizar o jogo por estados (`estado`), para depois acrescentar os ecrãs de Execução, Resultado e Loja.
+- Manter o rodapé numa função própria (`desenhaRodape()`), para aparecer em todos os ecrãs.
+
+**Utilização de IA:**
+- Ferramenta: Claude.
+- Finalidade: rever e ajudar na escrita do código para o esqueleto do `sketch.js`.
+- Resultado utilizado: o código do `sketch.js`.
+- Decisões minhas: começar por definir uma variável estado, criar o rodapé, a estrutura do repositório e o que fica em cada ficheiro.
