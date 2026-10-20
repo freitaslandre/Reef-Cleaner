@@ -1,11 +1,27 @@
-// Reef Cleaner - esqueleto inicial
-// Sistemas Multimédia | ECGM | 2026-2027
 
-// Estado atual do jogo: "inicio", "execucao" ou "resultado"
+
+// Estado do jogo: "inicio", "calibrando", "execucao", "resultado", "loja"
 let estado = "inicio";
+
+// Variáveis de Áudio e Calibração
+let mic;
+let tempoCalibracao = 3; // 3 segundos
+let cronometroCalib = 0;
+let ruidoBase = 0;
+let somaRuido = 0;
+let amostrasRuido = 0;
+
+// Limiares de Histerese e Zona Ideal
+let limiteMinimo = 0.05;
+let limiteMaximo = 0.60;
+let faixaIdealMin = 0.15;
+let faixaIdealMax = 0.35;
 
 function setup() {
   createCanvas(800, 600);
+  
+  // Inicializa o microfone
+  mic = new p5.AudioIn();
 }
 
 function draw() {
@@ -13,21 +29,119 @@ function draw() {
 
   if (estado === "inicio") {
     desenhaInicio();
+  } else if (estado === "calibrando") {
+    processaCalibracao();
   }
 
   desenhaRodape();
 }
 
-// Ecrã de início (por agora só o título)
+// Ecrã de Início com Instruções e Botão de Calibração
 function desenhaInicio() {
   fill(255);
   textAlign(CENTER, CENTER);
-  textSize(48);
-  text("REEF CLEANER", width / 2, height / 2);
+  
+  // Título
+  textSize(42);
+  text("REEF CLEANER", width / 2, 80);
+
+  // Caixa de Instruções
+  fill(0, 50, 80, 180);
+  rectMode(CENTER);
+  rect(width / 2, 230, 600, 180, 10);
+
+  fill(255);
+  textSize(16);
+  text("Objetivo: Limpar algas e sedimentos em 60s sem danificar o recife.", width / 2, 170);
+  text("Controlo: Rato move o limpador | Voz/Sopro ajusta a pressão do jato.", width / 2, 200);
+  text("Ganhe moedas, melhore a ferramenta e complete 100% até ao Nível 5!", width / 2, 230);
+  
+  textSize(14);
+  fill(200, 240, 255);
+  text("Atenção: A pressão ideal depende da calibração do seu microfone.", width / 2, 280);
+
+  // Botão de Calibração
+  fill(40, 160, 120);
+  rect(width / 2, 380, 260, 50, 8);
+  fill(255);
+  textSize(18);
+  text("Calibrar Microfone (3s)", width / 2, 380);
 }
 
-// Tema (esquerda) e identificação (direita), exigidos no enunciado
+// Processo de Calibração durante 3 segundos
+function processaCalibracao() {
+  let volumeAtual = mic.getLevel();
+  somaRuido += volumeAtual;
+  amostrasRuido++;
+
+  let tempoDecorrido = (millis() - cronometroCalib) / 1000;
+  let tempoRestante = max(0, tempoCalibracao - tempoDecorrido);
+
+  // Interface Visual da Calibração
+  fill(0, 50, 80, 200);
+  rectMode(CENTER);
+  rect(width / 2, height / 2, 500, 250, 10);
+
+  fill(255);
+  textAlign(CENTER, CENTER);
+  textSize(24);
+  text("Calibrando o som ambiente...", width / 2, height / 2 - 60);
+
+  textSize(16);
+  text("Mantenha o silêncio normal do seu quarto.", width / 2, height / 2 - 20);
+
+  // Contador
+  textSize(48);
+  fill(255, 220, 100);
+  text(tempoRestante.toFixed(1) + "s", width / 2, height / 2 + 30);
+
+  // Volume Instantâneo Medido
+  noFill();
+  stroke(255);
+  rect(width / 2, height / 2 + 80, 300, 15);
+  noStroke();
+  fill(100, 255, 150);
+  rectMode(CORNER);
+  rect(width / 2 - 150, height / 2 + 73, map(volumeAtual, 0, 1, 0, 300), 15);
+
+  // Fim da Calibração
+  if (tempoDecorrido >= tempoCalibracao) {
+    ruidoBase = somaRuido / amostrasRuido;
+    
+    // Define limites baseados no ruído do ambiente
+    limiteMinimo = max(0.02, ruidoBase * 1.5);
+    limiteMaximo = min(0.90, limiteMinimo + 0.50);
+    faixaIdealMin = limiteMinimo + 0.10;
+    faixaIdealMax = limiteMinimo + 0.30;
+
+    // Muda para a execução (em etapas futuras) ou volta ao menu
+    estado = "inicio"; 
+    alert("Calibração concluída! Ruído base: " + ruidoBase.toFixed(3));
+  }
+}
+
+// Clique do Rato para Ativar o Microfone e Iniciar Calibração
+function mousePressed() {
+  if (estado === "inicio") {
+    // Verifica se o clique foi no botão de calibração
+    if (mouseX > width / 2 - 130 && mouseX < width / 2 + 130 &&
+        mouseY > 380 - 25 && mouseY < 380 + 25) {
+      
+      // Ativa o áudio no navegador (requer gesto do utilizador)
+      userStartAudio();
+      mic.start();
+
+      somaRuido = 0;
+      amostrasRuido = 0;
+      cronometroCalib = millis();
+      estado = "calibrando";
+    }
+  }
+}
+
+// Tema e Identificação
 function desenhaRodape() {
+  rectMode(CORNER);
   fill(255);
   textSize(14);
   textAlign(LEFT, BOTTOM);
