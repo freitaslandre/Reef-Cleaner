@@ -19,14 +19,16 @@ let faixaIdealMax = 0.35;
 
 // Dados de Jogo
 let nivelAtual = 1;
-let moedas = 0; // Representa as moedas do tesouro
+let moedas = 0;
 let tempoRestante = 60;
 let percentagemLimpa = 0.0;
 let saudeRecife = 100;
 let cronometroJogo = 0;
 
-// Objetos
+// Objetos e Listas
 let limpador;
+let listaSujidade = [];
+let totalSujidadeInicial = 0;
 
 function setup() {
   createCanvas(800, 600);
@@ -48,7 +50,6 @@ function draw() {
   desenhaRodape();
 }
 
-// Ciclo Principal do Ecrã de Execução
 function executaJogo() {
   let vol = mic.getLevel();
 
@@ -56,20 +57,35 @@ function executaJogo() {
   let decorrido = (millis() - cronometroJogo) / 1000;
   tempoRestante = max(0, 60 - decorrido);
 
-  // Atualiza
   limpador.atualiza(vol);
-  
-  // Desenho do Cenário (Recife e Navio Naufragado)
-  fill(30, 110, 100);
-  noStroke();
-  ellipse(width / 2, height / 2 + 120, 700, 180);
 
-  desenhaNavioNaufragado();
+  // Desenha o novo Fundo Marinho Claro e Iluminado
+  desenhaFundoMarinho();
 
-  // Desenha Limpador
+  // Lógica de Limpeza das Manchas
+  let raioJato = map(vol, limiteMinimo, 1, 30, 90);
+  let dentroDaZonaIdeal = (vol >= faixaIdealMin && vol <= faixaIdealMax);
+
+  let sujidadeRestante = 0;
+
+  for (let m of listaSujidade) {
+    if (vol >= limiteMinimo) {
+      m.limpar(mouseX, mouseY, raioJato, dentroDaZonaIdeal);
+    }
+    m.desenhar();
+    
+    if (!m.limpa) {
+      sujidadeRestante += m.raioAtual;
+    }
+  }
+
+  if (totalSujidadeInicial > 0) {
+    let limpo = totalSujidadeInicial - sujidadeRestante;
+    percentagemLimpa = constrain((limpo / totalSujidadeInicial) * 100, 0, 100);
+  }
+
   limpador.desenha();
 
-  // Interfaces (HUD e Medidor de Som)
   desenhaHUD();
   desenhaMedidorMicrofone(vol);
 }
@@ -101,6 +117,13 @@ function processaCalibracao() {
     faixaIdealMin = limiteMinimo + 0.08;
     faixaIdealMax = limiteMinimo + 0.28;
 
+    // Inicia jogo e gera sujidade aleatória
+    listaSujidade = geraSujidadeAleatoria(15);
+    totalSujidadeInicial = 0;
+    for (let m of listaSujidade) {
+      totalSujidadeInicial += m.raioInicial;
+    }
+
     cronometroJogo = millis();
     estado = "execucao";
   }
@@ -131,8 +154,10 @@ function desenhaInicio() {
 
 function mousePressed() {
   if (estado === "inicio") {
-    if (mouseX > width / 2 - 130 && mouseX < width / 2 + 130 &&
-        mouseY > 380 - 25 && mouseY < 380 + 25) {
+    // Área do botão verde em Y = 410 (largura 280, altura 56)
+    if (mouseX > width / 2 - 140 && mouseX < width / 2 + 140 &&
+        mouseY > 410 - 28 && mouseY < 410 + 28) {
+      
       userStartAudio();
       mic.start();
       somaRuido = 0;
