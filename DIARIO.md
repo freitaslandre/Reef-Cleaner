@@ -116,3 +116,35 @@
 - Finalidade: Apoio na resolução de dúvidas de configuração do Git no VS Code, sugestões para a modularização do código em ficheiros `.js` e ajuste da documentação (`README.md`).
 - Resultado utilizado: Estrutura base dos módulos `UI.js` e `Player.js`.
 - Decisões minhas: Escrever todo o código do jogo no VS Code, definir a inclusão local das bibliotecas do p5, criar a temática do navio naufragado/baú do tesouro, escolher a convenção de *commits* em inglês e validar cada etapa do projeto.
+
+---
+
+## Sessão 5 – 20 de outubro de 2026
+
+**Objetivo:** Implementar a geração aleatória de manchas de sujidade/algas, programar a mecânica de limpeza por sopro/colisão, reformular a estética visual dos ecrãs e atualizar o repositório.
+
+**Atividades realizadas:**
+- Decidi criar o módulo `Dirt.js` para gerir a classe `ManchaSujidade` e a função de geração procedural `geraSujidadeAleatoria()`, espalhando as algas e sedimentos aleatoriamente pelo recife a cada partida (requisito de aleatoriedade).
+- Programei a lógica de colisão no `Dirt.js` e `sketch.js`, onde o jato de limpeza atua sobre as manchas e reduz o seu raio em tempo real apenas quando o volume do microfone está dentro da zona de pressão ideal.
+- Implementei o cálculo contínuo da percentagem de recife limpa no HUD, com base na área/raio de sujidade eliminada em relação ao total inicial.
+- Redesenhei o ambiente visual em `UI.js` para um estilo marinho turquesa mais iluminado, adicionando um gradiente de água, raios de luz solar subaquáticos, leito de areia clara e animação suave de bolhas.
+- Reformulei o layout do ecrã de Início e o ecrã de Calibração, ajustando os cartões de instrução, o botão de ação e adicionando uma barra de progresso verde e contador numérico em destaque durante a calibração de 3 segundos.
+- Corrigi as coordenadas de clique da função `mousePressed()` no `sketch.js` para alinhar com o novo botão "Calibrar e Jogar".
+- Atualizei o ficheiro `README.md` com a nova árvore de ficheiros e fiz o *commit* consolidado das alterações no GitHub.
+
+**Problemas:**
+- Ao ajustar o visual do botão de início no `UI.js`, o clique deixou de responder e o jogo não passava para a calibração.
+
+**Solução:**
+- Reajustei os limites da área clicável (`mouseX` e `mouseY`) dentro da função `mousePressed()` no `sketch.js` para corresponderem exatamente à nova posição central em Y (410) e às dimensões do botão.
+
+**Decisões:**
+- Criar o ficheiro `Dirt.js` em vez de sobrecarregar o `sketch.js`, mantendo a arquitetura modular do projeto.
+- Tornar a mecânica de limpeza estritamente dependente da faixa verde de pressão ideal, incentivando o controlo do sopro por parte do jogador.
+- Agrupar as alterações visuais e a lógica de sujidade num único *commit* bem documentado.
+
+**Utilização de IA:**
+- Ferramenta: Gemini.
+- Finalidade: Apoio na reestruturação da função `mousePressed()` para a área redefinida do botão e sugestões para os estilos visuais de gradiente e bolhas no p5.js.
+- Resultado utilizado: Lógica de cálculo de clique no botão e código base para o gradiente e bolhas de fundo.
+- Decisões minhas: Criar a classe e mecânica do `Dirt.js`, ajustar a sensibilidade de limpeza das manchas, definir a nova paleta de cores turquesa e organizar a documentação.
