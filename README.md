@@ -18,7 +18,7 @@ O jogador restaura um recife de coral degradado e branqueado, removendo algas, s
 - Cada nível dura **60 s**.
 - O **rato** move o limpador.
 - O **volume da voz/sopro** (microfone) controla a intensidade do jato, que é mais eficaz quanto mais perto estiver da zona ideal. Fraco demais não limpa e forte demais danifica o coral.
-- No fim de cada nível, o jogador vê a % de recife limpa e as moedas ganhas (≥ 75%, ≥ 90% e 100%).
+- No fim de cada nível, o jogador ganha moedas do tesouro (resgatadas do navio naufragado no fundo do mar) com base na % de recife limpa (≥ 75%, ≥ 90% e 100%).
 - As moedas servem para melhorar a ferramenta na loja de upgrades.
 - **Objetivo final:** completar o nível 5 com 100% de limpeza.
 
@@ -47,9 +47,12 @@ O jogador restaura um recife de coral degradado e branqueado, removendo algas, s
 ```
 Reef-Cleaner/
 ├── index.html
-├── sketch.js
-├── classes/      # Game, Level, Cleaner, MicInput, Dirt, Fish, Shop
-├── assets/       # imagens e sons
+├── sketch.js         # Script principal e máquina de estados
+├── UI.js             # Gestão da interface, HUD, medidor do microfone e navio
+├── Player.js         # Classe do limpador e jato de pressão
+├── p5/               # Bibliotecas p5.js e p5.sound locais
+├── assets/           # Imagens, sons e recursos multimédia (futuro)
+├── DIARIO.md         # Diário de desenvolvimento da disciplina
 └── README.md
 ```
 
@@ -62,3 +65,7 @@ Material não original (imagens, sons, bibliotecas) será indicado aqui, com a r
 ## Utilização de IA
 
 Foi usada IA generativa como apoio à ideia, ao planeamento e à revisão. O registo detalhado consta do diário de desenvolvimento.
+
+## Diário de Desenvolvimento
+
+O registo de cada sessão de trabalho, decisões tomadas, problemas encontrados e utilização de ferramentas de IA pode ser consultado no ficheiro [DIARIO.md](./DIARIO.md).
