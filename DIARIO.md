@@ -148,3 +148,33 @@
 - Finalidade: Apoio na reestruturação da função `mousePressed()` para a área redefinida do botão e sugestões para os estilos visuais de gradiente e bolhas no p5.js.
 - Resultado utilizado: Lógica de cálculo de clique no botão e código base para o gradiente e bolhas de fundo.
 - Decisões minhas: Criar a classe e mecânica do `Dirt.js`, ajustar a sensibilidade de limpeza das manchas, definir a nova paleta de cores turquesa e organizar a documentação.
+
+---
+
+## Sessão 6 – 21 de outubro de 2026
+
+**Objetivo:** Integrar uma biblioteca gráfica procedural completa em P5.js com assets ilustrados (fauna marinha, corais, navio naufragado, tesouro e ferramenta de limpeza) e ligar o módulo `Assets.js` ao ecossistema do jogo.
+
+**Atividades realizadas:**
+- Elaborei um *prompt* estruturado em inglês para geração de código procedural em P5.js com auxílio de IA (Claude) para criação do ficheiro `Assets.js`.
+- Adicionei o módulo `Assets.js` à raiz do projeto e declarei-o no `index.html` garantindo a correta ordem de carregamento antes dos módulos de interface e jogador.
+- Atualizei o ficheiro `Player.js` para utilizar a nova função `drawCleanerNozzle()`, substituindo a representação circular simples do limpador por uma bocal metálico com indicação LED de estado e partículas de jato[cite: 4].
+- Reformulei o `UI.js` para desenhar os novos elementos visuais: peixes animados a nadar no fundo marinho (`drawFish`), corais saudáveis (`drawCoralHealthy`), corais branqueados (`drawCoralBleached`), conchas (`drawShell`), o navio naufragado com baú de moedas (`drawSunkenShipwreck`) e o ícone de moeda dourada (`drawGoldCoin`) no HUD.
+- Resolvi os erros de carregamento e escopo na consola (`404 Not Found` e `drawFish is not defined`) garantindo a correta inclusão do script `Assets.js`.
+- Documentei o progresso e realizei o *commit* no GitHub com a mensagem `"Integrate procedural Assets.js module with fish, corals, shipwreck, treasure and cleaner nozzle"`.
+
+**Problemas:**
+- Ao carregar a aplicação, a consola apresentou o erro `Assets.js 404 (Not Found)` e `drawFish is not defined`, impedindo a renderização do ecrã do jogo.
+
+**Solução:**
+- Verifiquei a localização do ficheiro `Assets.js`, garantindo que estava posicionado na raiz do repositório e que a tag `<script src="Assets.js"></script>` antecedia o `UI.js` no `index.html`.
+
+**Decisões:**
+- Optar por ilustrações procedurais em P5.js com primitives, curvas Bézier e gradientes Canvas em vez de ficheiros PNG externos, garantindo uma estética coerente, leve e de melhor avaliação técnica no âmbito da disciplina.
+- Manter o foco na arquitetura modular sem sobrecarregar o `sketch.js`.
+
+**Utilização de IA:**
+- Ferramenta: Gemini e Claude.
+- Finalidade: Criação do *prompt* de geração vetorial para P5.js e auxílio na integração das funções do `Assets.js` nos ficheiros `UI.js` e `Player.js`.
+- Resultado utilizado: Código completo do `Assets.js` com as funções de desenho tridimensional e reestruturação do `Player.js` e `UI.js`.
+- Decisões minhas: Definir a lista de assets necessários para o tema do jogo, testar a integração dos scripts e validar o comportamento visual do ecossistema.
