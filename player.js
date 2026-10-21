@@ -1,8 +1,8 @@
-// Player.js - Limpador e Jato de Áudio
+// Player.js - Ferramenta Limpadora com Integração de Assets
 
 class Limpador {
   constructor() {
-    this.raioLimpador = 25;
+    this.tamanho = 55;
     this.intensidadeJato = 0;
   }
 
@@ -14,24 +14,23 @@ class Limpador {
     let x = mouseX;
     let y = mouseY;
 
-    // Se o volume ultrapassar o limite mínimo (Histerese), ativa o jato
-    if (this.intensidadeJato >= limiteMinimo) {
-      let tamanhoJato = map(this.intensidadeJato, limiteMinimo, 1, 30, 90);
-      
+    let ativa = this.intensidadeJato >= limiteMinimo;
+
+    // Jato de Água / Pressão (Efeito Visual)
+    if (ativa) {
+      let tamanhoJato = map(this.intensidadeJato, limiteMinimo, 1, 40, 110);
+
       if (this.intensidadeJato >= faixaIdealMin && this.intensidadeJato <= faixaIdealMax) {
-        fill(100, 220, 255, 160); // Jato Suave Ideal
+        fill(100, 220, 255, 140); // Pressão Ideal Suave
       } else {
-        fill(255, 100, 100, 180); // Jato Demasiado Forte
+        fill(255, 90, 90, 160);  // Pressão Demasiado Forte
       }
 
       noStroke();
-      ellipse(x, y, tamanhoJato, tamanhoJato);
+      ellipse(x + 25, y, tamanhoJato, tamanhoJato);
     }
 
-    // Ferramenta / Ponteiro do Limpador (Rato)
-    stroke(255);
-    strokeWeight(2);
-    fill(40, 180, 220);
-    ellipse(x, y, this.raioLimpador, this.raioLimpador);
+    // Desenha a Ferramenta Limpadora Usando o Asset em P5.js
+    drawCleanerNozzle(x, y, this.tamanho, ativa);
   }
 }

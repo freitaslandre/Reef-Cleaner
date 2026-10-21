@@ -1,8 +1,10 @@
-// UI.js - Interface, HUD, Medidores, Ecrã Inicial e Calibração
+// UI.js - Interface, HUD, Medidores, Fundo Marinho e Desenho de Assets
 
 let bolhasFundo = [];
+let peixesFundo = [];
 
-function inicializaBolhasFundo() {
+function inicializaFundoAtivo() {
+  // Bolhas de Fundo
   if (bolhasFundo.length === 0) {
     for (let i = 0; i < 25; i++) {
       bolhasFundo.push({
@@ -13,11 +15,18 @@ function inicializaBolhasFundo() {
       });
     }
   }
+
+  // Peixes em Movimento
+  if (peixesFundo.length === 0) {
+    peixesFundo.push({ x: 100, y: 180, speed: 1.2, size: 40, species: 1, dir: 1 });
+    peixesFundo.push({ x: 700, y: 260, speed: 0.9, size: 45, species: 2, dir: -1 });
+    peixesFundo.push({ x: 300, y: 340, speed: 1.5, size: 35, species: 3, dir: 1 });
+  }
 }
 
 // Fundo Marinho Iluminado
 function desenhaFundoMarinho() {
-  // Gradiente Água Turquesa Iluminada
+  // 1. Gradiente Água Turquesa Iluminada
   for (let y = 0; y < height; y++) {
     let inter = map(y, 0, height, 0, 1);
     let c = lerpColor(color(40, 180, 220), color(15, 75, 120), inter);
@@ -25,7 +34,7 @@ function desenhaFundoMarinho() {
     line(0, y, width, y);
   }
 
-  // Raios de Sol Subaquáticos
+  // 2. Raios de Sol Subaquáticos
   noStroke();
   fill(255, 255, 200, 25);
   beginShape();
@@ -36,8 +45,10 @@ function desenhaFundoMarinho() {
   vertex(450, 0); vertex(580, 0); vertex(720, height); vertex(520, height);
   endShape(CLOSE);
 
-  // Bolhas de Fundo
-  inicializaBolhasFundo();
+  // 3. Bolhas e Peixes a Nadar
+  inicializaFundoAtivo();
+
+  // Bolhas
   fill(255, 255, 255, 80);
   noStroke();
   for (let b of bolhasFundo) {
@@ -50,28 +61,48 @@ function desenhaFundoMarinho() {
     }
   }
 
-  // Leito de Areia Dourada
+  // Peixes Animados
+  for (let p of peixesFundo) {
+    p.x += p.speed * p.dir;
+    if (p.x > width + 50) p.dir = -1;
+    if (p.x < -50) p.dir = 1;
+    drawFish(p.x, p.y, p.size, p.dir, p.species);
+  }
+
+  // 4. Leito de Areia Dourada
   fill(220, 195, 130);
   noStroke();
   ellipse(width / 2, height + 90, 980, 320);
 
-  // Navio e Baú do Tesouro
-  desenhaNavioNaufragado();
+  // 5. Assets Gráficos do Fundo (Navio, Conchas, Corais Vivos e Branqueados)
+  drawSunkenShipwreck(220, 520);
+
+  drawShell(340, 540, 25);
+  drawShell(680, 530, 20);
+
+  // Corais Saudáveis
+  drawCoralHealthy(380, 510, 65, 1);
+  drawCoralHealthy(460, 500, 75, 2);
+  drawCoralHealthy(640, 490, 70, 3);
+
+  // Corais Branqueados (A precisar de limpeza)
+  drawCoralBleached(530, 520, 80, 1);
+  drawCoralBleached(590, 510, 60, 2);
 }
 
-// ECRÃ INICIAL RENOVAL
+// ECRÃ INICIAL
 function desenhaInicio() {
   desenhaFundoMarinho();
 
-  // Título com Brilho/Sombra
+  // Título
   textAlign(CENTER, CENTER);
   textSize(48);
   fill(10, 40, 70, 150);
-  text("REEF CLEANER", width / 2 + 3, 83); // Sombra
+  text("REEF CLEANER", width / 2 + 3, 83);
   fill(255, 240, 180);
   text("REEF CLEANER", width / 2, 80);
 
-  // Cartão Principal de Instruções Translúcido
+  // Cartão Principal de Instruções
   fill(10, 35, 60, 210);
   stroke(80, 200, 240, 180);
   strokeWeight(2);
@@ -102,7 +133,7 @@ function desenhaInicio() {
   textSize(14);
   text("Recolha moedas do tesouro do navio e complete 100% dos 5 níveis!", width / 2, 325);
 
-  // Botão "Calibrar e Jogar" Atraente
+  // Botão "Calibrar e Jogar"
   let emCima = mouseX > width / 2 - 140 && mouseX < width / 2 + 140 &&
                mouseY > 410 - 28 && mouseY < 410 + 28;
 
@@ -123,7 +154,7 @@ function desenhaInicio() {
   text("Calibrar e Jogar (3s)", width / 2, 410);
 }
 
-// ECRÃ DE CALIBRAÇÃO RENOVAL
+// ECRÃ DE CALIBRAÇÃO
 function processaCalibracao() {
   let volumeAtual = mic.getLevel();
   somaRuido += volumeAtual;
@@ -134,7 +165,6 @@ function processaCalibracao() {
 
   desenhaFundoMarinho();
 
-  // Caixas de Calibração Translúcida
   fill(10, 35, 60, 220);
   stroke(80, 200, 240, 200);
   strokeWeight(2);
@@ -151,12 +181,10 @@ function processaCalibracao() {
   textSize(14);
   text("Mantenha o silêncio normal da divisão durante o contador.", width / 2, height / 2 - 35);
 
-  // Contador Gigante Dourado
   textSize(54);
   fill(255, 220, 80);
   text(restante.toFixed(1) + "s", width / 2, height / 2 + 25);
 
-  // Barra de Progresso da Calibração
   let progresso = map(tempoDecorrido, 0, tempoCalibracao, 0, 400);
   progresso = constrain(progresso, 0, 400);
 
@@ -167,7 +195,6 @@ function processaCalibracao() {
   rectMode(CORNER);
   rect(width / 2 - 200, height / 2 + 72, progresso, 16, 8);
 
-  // Conclusão da Calibração
   if (tempoDecorrido >= tempoCalibracao) {
     ruidoBase = somaRuido / amostrasRuido;
     limiteMinimo = max(0.03, ruidoBase * 1.8);
@@ -183,37 +210,6 @@ function processaCalibracao() {
     cronometroJogo = millis();
     estado = "execucao";
   }
-}
-
-// Desenha Navio
-function desenhaNavioNaufragado() {
-  push();
-  fill(55, 35, 20);
-  stroke(30, 15, 8);
-  strokeWeight(2);
-
-  beginShape();
-  vertex(40, 520);
-  vertex(220, 495);
-  vertex(260, 565);
-  vertex(20, 575);
-  endShape(CLOSE);
-
-  strokeWeight(5);
-  stroke(40, 25, 12);
-  line(110, 510, 80, 400);
-  line(180, 500, 210, 420);
-
-  rectMode(CORNER);
-  fill(120, 80, 30);
-  stroke(240, 190, 50);
-  strokeWeight(2);
-  rect(215, 528, 45, 28, 4);
-
-  drawMoedaTesouroIcone(225, 524, 5);
-  drawMoedaTesouroIcone(237, 522, 6);
-  drawMoedaTesouroIcone(248, 525, 5);
-  pop();
 }
 
 // HUD Superior
@@ -235,26 +231,14 @@ function desenhaHUD() {
   text(`Tempo: ${ceil(tempoRestante)}s`, 120, 25);
   text(`Limpo: ${percentagemLimpa.toFixed(1)}%`, 240, 25);
 
-  drawMoedaTesouroIcone(375, 25, 9);
+  // Ícone de Moeda do Tesouro
+  drawGoldCoin(375, 25, 10);
   fill(255, 220, 80);
   textSize(15);
-  text(`Tesouro: ${moedas}`, 392, 25);
+  text(`Tesouro: ${moedas}`, 395, 25);
 
   fill(255);
   text(`Saúde Recife: ${saudeRecife}%`, 530, 25);
-}
-
-function drawMoedaTesouroIcone(x, y, r) {
-  push();
-  stroke(180, 130, 20);
-  strokeWeight(1.5);
-  fill(255, 215, 0);
-  ellipse(x, y, r * 2, r * 2);
-
-  noStroke();
-  fill(210, 160, 10);
-  ellipse(x, y, r * 1.1, r * 1.1);
-  pop();
 }
 
 // Medidor Vertical do Microfone

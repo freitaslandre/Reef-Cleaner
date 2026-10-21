@@ -59,10 +59,10 @@ function executaJogo() {
 
   limpador.atualiza(vol);
 
-  // Desenha o novo Fundo Marinho Claro e Iluminado
+  // Desenha o cenário completo (com os novos assets do Assets.js)
   desenhaFundoMarinho();
 
-  // Lógica de Limpeza das Manchas
+  // Lógica de Limpeza das Manchas de Sujidade
   let raioJato = map(vol, limiteMinimo, 1, 30, 90);
   let dentroDaZonaIdeal = (vol >= faixaIdealMin && vol <= faixaIdealMax);
 
@@ -84,8 +84,10 @@ function executaJogo() {
     percentagemLimpa = constrain((limpo / totalSujidadeInicial) * 100, 0, 100);
   }
 
+  // Desenha a ferramenta do jogador no cursor
   limpador.desenha();
 
+  // Interfaces
   desenhaHUD();
   desenhaMedidorMicrofone(vol);
 }
