@@ -1,9 +1,9 @@
-// Reef Cleaner - Principal
+// Reef Cleaner - Principal com Níveis, Recompensas e Loja
 // Sistemas Multimédia | ECGM | 2026-2027
 
-let estado = "inicio";
+let estado = "inicio"; // "inicio", "calibrando", "execucao", "fimNivel", "loja", "gameOver"
 
-// Áudio
+// Áudio e Calibração
 let mic;
 let tempoCalibracao = 3;
 let cronometroCalib = 0;
@@ -11,19 +11,25 @@ let ruidoBase = 0;
 let somaRuido = 0;
 let amostrasRuido = 0;
 
-// Limiares
+// Limiares de Pressão
 let limiteMinimo = 0.05;
 let limiteMaximo = 0.60;
 let faixaIdealMin = 0.15;
 let faixaIdealMax = 0.35;
 
-// Dados de Jogo
+// Dados Globais de Progressão
 let nivelAtual = 1;
+let totalNiveis = 5;
 let moedas = 0;
 let tempoRestante = 60;
+let tempoLimiteNivel = 60;
 let percentagemLimpa = 0.0;
 let saudeRecife = 100;
 let cronometroJogo = 0;
+
+// Upgrades da Loja
+let upgradeLargo = 0;       // Aumenta o raio do jato
+let upgradeTolerancia = 0;  // Alarga a faixa verde ideal
 
 // Objetos e Listas
 let limpador;
@@ -45,9 +51,34 @@ function draw() {
     processaCalibracao();
   } else if (estado === "execucao") {
     executaJogo();
+  } else if (estado === "fimNivel") {
+    desenhaFimNivel();
+  } else if (estado === "loja") {
+    desenhaLoja();
+  } else if (estado === "gameOver") {
+    desenhaGameOver();
   }
 
   desenhaRodape();
+}
+
+function iniciaNivel(numNivel) {
+  nivelAtual = numNivel;
+  tempoLimiteNivel = max(40, 65 - nivelAtual * 5); // Menos tempo em níveis avançados
+  tempoRestante = tempoLimiteNivel;
+  percentagemLimpa = 0.0;
+
+  // Mais manchas de sujidade à medida que o nível sobe
+  let qtdSujidade = 10 + nivelAtual * 5;
+  listaSujidade = geraSujidadeAleatoria(qtdSujidade);
+
+  totalSujidadeInicial = 0;
+  for (let m of listaSujidade) {
+    totalSujidadeInicial += m.raioInicial;
+  }
+
+  cronometroJogo = millis();
+  estado = "execucao";
 }
 
 function executaJogo() {
@@ -55,16 +86,20 @@ function executaJogo() {
 
   // Gestão do Tempo
   let decorrido = (millis() - cronometroJogo) / 1000;
-  tempoRestante = max(0, 60 - decorrido);
+  tempoRestante = max(0, tempoLimiteNivel - decorrido);
 
   limpador.atualiza(vol);
 
-  // Desenha o cenário completo (com os novos assets do Assets.js)
+  // Fundo Marinho
   desenhaFundoMarinho();
 
-  // Lógica de Limpeza das Manchas de Sujidade
-  let raioJato = map(vol, limiteMinimo, 1, 30, 90);
-  let dentroDaZonaIdeal = (vol >= faixaIdealMin && vol <= faixaIdealMax);
+  // Tolerância aumentada pelos upgrades
+  let tolMin = max(0.05, faixaIdealMin - upgradeTolerancia * 0.02);
+  let tolMax = faixaIdealMax + upgradeTolerancia * 0.03;
+
+  let raioJatoBase = map(vol, limiteMinimo, 1, 30, 90);
+  let raioJato = raioJatoBase + (upgradeLargo * 12); // Upgrade de largura
+  let dentroDaZonaIdeal = (vol >= tolMin && vol <= tolMax);
 
   let sujidadeRestante = 0;
 
@@ -73,23 +108,44 @@ function executaJogo() {
       m.limpar(mouseX, mouseY, raioJato, dentroDaZonaIdeal);
     }
     m.desenhar();
-    
+
     if (!m.limpa) {
       sujidadeRestante += m.raioAtual;
     }
   }
 
+  // Atualiza percentagem limpa
   if (totalSujidadeInicial > 0) {
     let limpo = totalSujidadeInicial - sujidadeRestante;
     percentagemLimpa = constrain((limpo / totalSujidadeInicial) * 100, 0, 100);
   }
 
-  // Desenha a ferramenta do jogador no cursor
   limpador.desenha();
 
-  // Interfaces
   desenhaHUD();
   desenhaMedidorMicrofone(vol);
+
+  // Verificação de Fim de Nivel (Vitória ou Tempo Esgotado)
+  if (percentagemLimpa >= 100) {
+    concluiNivel(true);
+  } else if (tempoRestante <= 0) {
+    if (percentagemLimpa >= 70) {
+      concluiNivel(true); // Passa com pelo menos 70% limpo
+    } else {
+      concluiNivel(false); // Derrota
+    }
+  }
+}
+
+function concluiNivel(sucesso) {
+  if (sucesso) {
+    // Recompensa de moedas proporcional à percentagem limpa e nível
+    let moedasGanha = floor((percentagemLimpa / 10) * nivelAtual);
+    moedas += moedasGanha;
+    estado = "fimNivel";
+  } else {
+    estado = "gameOver";
+  }
 }
 
 function processaCalibracao() {
@@ -100,18 +156,37 @@ function processaCalibracao() {
   let tempoDecorrido = (millis() - cronometroCalib) / 1000;
   let restante = max(0, tempoCalibracao - tempoDecorrido);
 
-  fill(0, 50, 80, 200);
-  rectMode(CENTER);
-  rect(width / 2, height / 2, 500, 250, 10);
+  desenhaFundoMarinho();
 
+  fill(10, 35, 60, 220);
+  stroke(80, 200, 240, 200);
+  strokeWeight(2);
+  rectMode(CENTER);
+  rect(width / 2, height / 2, 520, 260, 15);
+
+  noStroke();
   fill(255);
   textAlign(CENTER, CENTER);
-  textSize(24);
-  text("Calibrando o som ambiente...", width / 2, height / 2 - 60);
+  textSize(22);
+  text("A calibrar o som ambiente...", width / 2, height / 2 - 70);
 
-  textSize(48);
-  fill(255, 220, 100);
-  text(restante.toFixed(1) + "s", width / 2, height / 2 + 20);
+  fill(180, 220, 255);
+  textSize(14);
+  text("Mantenha o silêncio normal da divisão durante o contador.", width / 2, height / 2 - 35);
+
+  textSize(54);
+  fill(255, 220, 80);
+  text(restante.toFixed(1) + "s", width / 2, height / 2 + 25);
+
+  let progresso = map(tempoDecorrido, 0, tempoCalibracao, 0, 400);
+  progresso = constrain(progresso, 0, 400);
+
+  fill(20, 60, 90);
+  rect(width / 2, height / 2 + 80, 400, 16, 8);
+
+  fill(50, 220, 130);
+  rectMode(CORNER);
+  rect(width / 2 - 200, height / 2 + 72, progresso, 16, 8);
 
   if (tempoDecorrido >= tempoCalibracao) {
     ruidoBase = somaRuido / amostrasRuido;
@@ -119,53 +194,61 @@ function processaCalibracao() {
     faixaIdealMin = limiteMinimo + 0.08;
     faixaIdealMax = limiteMinimo + 0.28;
 
-    // Inicia jogo e gera sujidade aleatória
-    listaSujidade = geraSujidadeAleatoria(15);
-    totalSujidadeInicial = 0;
-    for (let m of listaSujidade) {
-      totalSujidadeInicial += m.raioInicial;
-    }
-
-    cronometroJogo = millis();
-    estado = "execucao";
+    iniciaNivel(1);
   }
-}
-
-function desenhaInicio() {
-  fill(255);
-  textAlign(CENTER, CENTER);
-  textSize(42);
-  text("REEF CLEANER", width / 2, 80);
-
-  fill(0, 50, 80, 180);
-  rectMode(CENTER);
-  rect(width / 2, 230, 600, 180, 10);
-
-  fill(255);
-  textSize(16);
-  text("Objetivo: Limpar algas e sedimentos em 60s sem danificar o recife.", width / 2, 170);
-  text("Controlo: Rato move o limpador | Voz/Sopro ajusta a pressão do jato.", width / 2, 200);
-  text("Recolha moedas do tesouro do navio e melhore a sua ferramenta!", width / 2, 230);
-
-  fill(40, 160, 120);
-  rect(width / 2, 380, 260, 50, 8);
-  fill(255);
-  textSize(18);
-  text("Calibrar e Jogar (3s)", width / 2, 380);
 }
 
 function mousePressed() {
   if (estado === "inicio") {
-    // Área do botão verde em Y = 410 (largura 280, altura 56)
     if (mouseX > width / 2 - 140 && mouseX < width / 2 + 140 &&
         mouseY > 410 - 28 && mouseY < 410 + 28) {
-      
       userStartAudio();
       mic.start();
       somaRuido = 0;
       amostrasRuido = 0;
       cronometroCalib = millis();
       estado = "calibrando";
+    }
+  } else if (estado === "fimNivel") {
+    // Botão "Ir para a Loja"
+    if (mouseX > width / 2 - 210 && mouseX < width / 2 - 10 && mouseY > 400 && mouseY < 450) {
+      estado = "loja";
+    }
+    // Botão "Próximo Nível"
+    if (mouseX > width / 2 + 10 && mouseX < width / 2 + 210 && mouseY > 400 && mouseY < 450) {
+      if (nivelAtual < totalNiveis) {
+        iniciaNivel(nivelAtual + 1);
+      } else {
+        estado = "inicio"; // Jogo Concluído!
+      }
+    }
+  } else if (estado === "loja") {
+    // Upgrade 1: Jato Mais Largo (Preço: 15 moedas)
+    if (mouseX > width / 2 - 240 && mouseX < width / 2 - 20 && mouseY > 330 && mouseY < 375) {
+      if (moedas >= 15 && upgradeLargo < 3) {
+        moedas -= 15;
+        upgradeLargo++;
+      }
+    }
+    // Upgrade 2: Tolerância de Pressão (Preço: 20 moedas)
+    if (mouseX > width / 2 + 20 && mouseX < width / 2 + 240 && mouseY > 330 && mouseY < 375) {
+      if (moedas >= 20 && upgradeTolerancia < 3) {
+        moedas -= 20;
+        upgradeTolerancia++;
+      }
+    }
+    // Botão "Continuar Jogo"
+    if (mouseX > width / 2 - 120 && mouseX < width / 2 + 120 && mouseY > 440 && mouseY < 490) {
+      if (nivelAtual < totalNiveis) {
+        iniciaNivel(nivelAtual + 1);
+      } else {
+        iniciaNivel(1);
+      }
+    }
+  } else if (estado === "gameOver") {
+    // Botão "Tentar Novamente"
+    if (mouseX > width / 2 - 130 && mouseX < width / 2 + 130 && mouseY > 380 && mouseY < 430) {
+      iniciaNivel(nivelAtual);
     }
   }
 }

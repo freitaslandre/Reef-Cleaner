@@ -310,3 +310,162 @@ function desenhaMedidorMicrofone(volAtual) {
   textAlign(CENTER, TOP);
   text("Micro", x + larg / 2, y + alt + 8);
 }
+
+// ECRÃ DE FIM DE NÍVEL (RESULTADOS & RECOMPENSA)
+function desenhaFimNivel() {
+  desenhaFundoMarinho();
+
+  fill(10, 35, 60, 220);
+  stroke(80, 200, 240, 200);
+  strokeWeight(2);
+  rectMode(CENTER);
+  rect(width / 2, height / 2, 540, 320, 15);
+
+  noStroke();
+  fill(255, 220, 80);
+  textAlign(CENTER, CENTER);
+  textSize(36);
+  text(`NÍVEL ${nivelAtual} CONCLUÍDO!`, width / 2, height / 2 - 110);
+
+  fill(255);
+  textSize(20);
+  text(`Recife Limpo: ${percentagemLimpa.toFixed(1)}%`, width / 2, height / 2 - 50);
+
+  // Tesouro Ganho
+  let ganho = floor((percentagemLimpa / 10) * nivelAtual);
+  drawGoldCoin(width / 2 - 80, height / 2, 14);
+  fill(255, 215, 0);
+  textSize(22);
+  text(`+${ganho} Moedas do Tesouro!`, width / 2 + 20, height / 2);
+
+  // Botões de Ação
+  rectMode(CORNER);
+
+  // Botão Loja
+  fill(40, 120, 180);
+  stroke(255);
+  strokeWeight(2);
+  rect(width / 2 - 210, 400, 200, 50, 10);
+  fill(255);
+  noStroke();
+  textSize(18);
+  text("Loja de Upgrades", width / 2 - 110, 425);
+
+  // Botão Próximo Nível
+  fill(50, 200, 120);
+  stroke(255);
+  strokeWeight(2);
+  rect(width / 2 + 10, 400, 200, 50, 10);
+  fill(255);
+  noStroke();
+  textSize(18);
+  text(nivelAtual < totalNiveis ? "Próximo Nível" : "Menu Inicial", width / 2 + 110, 425);
+}
+
+// ECRÃ DA LOJA DE UPGRADES
+function desenhaLoja() {
+  desenhaFundoMarinho();
+
+  fill(10, 35, 60, 230);
+  stroke(240, 190, 50, 220);
+  strokeWeight(2);
+  rectMode(CENTER);
+  rect(width / 2, height / 2, 560, 360, 15);
+
+  textAlign(CENTER, CENTER);
+  fill(255, 220, 80);
+  textSize(32);
+  text("LOJA DE MELHORIAS", width / 2, height / 2 - 140);
+
+  // Saldo Atual
+  drawGoldCoin(width / 2 - 60, height / 2 - 95, 12);
+  fill(255);
+  textSize(18);
+  text(`Seu Tesouro: ${moedas} moedas`, width / 2 + 30, height / 2 - 95);
+
+  // Item 1: Jato Mais Largo
+  fill(20, 60, 95);
+  rect(width / 2 - 130, height / 2, 220, 130, 10);
+  fill(255);
+  textSize(16);
+  text("Jato Ampliado", width / 2 - 130, height / 2 - 40);
+  textSize(12);
+  fill(180, 220, 255);
+  text(`Nível: ${upgradeLargo}/3`, width / 2 - 130, height / 2 - 15);
+  text("Aumenta o raio de alcance", width / 2 - 130, height / 2 + 5);
+
+  // Botão Comprar Item 1
+  rectMode(CORNER);
+  fill(moedas >= 15 && upgradeLargo < 3 ? color(50, 200, 120) : color(80, 90, 100));
+  stroke(255);
+  rect(width / 2 - 240, 330, 220, 45, 8);
+  fill(255);
+  noStroke();
+  textSize(15);
+  text(upgradeLargo >= 3 ? "MÁXIMO" : "Comprar (15 M)", width / 2 - 130, 352);
+
+  // Item 2: Tolerância de Pressão
+  rectMode(CENTER);
+  fill(20, 60, 95);
+  rect(width / 2 + 130, height / 2, 220, 130, 10);
+  fill(255);
+  textSize(16);
+  text("Bocal de Precisão", width / 2 + 130, height / 2 - 40);
+  textSize(12);
+  fill(180, 220, 255);
+  text(`Nível: ${upgradeTolerancia}/3`, width / 2 + 130, height / 2 - 15);
+  text("Facilita manter a pressão", width / 2 + 130, height / 2 + 5);
+
+  // Botão Comprar Item 2
+  rectMode(CORNER);
+  fill(moedas >= 20 && upgradeTolerancia < 3 ? color(50, 200, 120) : color(80, 90, 100));
+  stroke(255);
+  rect(width / 2 + 20, 330, 220, 45, 8);
+  fill(255);
+  noStroke();
+  textSize(15);
+  text(upgradeTolerancia >= 3 ? "MÁXIMO" : "Comprar (20 M)", width / 2 + 130, 352);
+
+  // Botão Voltar ao Jogo
+  fill(40, 140, 200);
+  stroke(255);
+  rect(width / 2 - 120, 440, 240, 50, 10);
+  fill(255);
+  noStroke();
+  textSize(18);
+  text("Continuar Jogo", width / 2, 465);
+}
+
+// ECRÃ DE GAME OVER / DERROTA
+function desenhaGameOver() {
+  desenhaFundoMarinho();
+
+  fill(10, 35, 60, 230);
+  stroke(255, 80, 80, 220);
+  strokeWeight(2);
+  rectMode(CENTER);
+  rect(width / 2, height / 2, 500, 260, 15);
+
+  textAlign(CENTER, CENTER);
+  fill(255, 90, 90);
+  textSize(36);
+  text("TEMPO ESGOTADO!", width / 2, height / 2 - 70);
+
+  fill(255);
+  textSize(18);
+  text(`Apenas ${percentagemLimpa.toFixed(1)}% do recife foi limpo.`, width / 2, height / 2 - 15);
+  textSize(14);
+  fill(200, 220, 245);
+  text("Necessita de pelo menos 70% para avançar de nível.", width / 2, height / 2 + 15);
+
+  rectMode(CORNER);
+  fill(220, 70, 70);
+  stroke(255);
+  strokeWeight(2);
+  rect(width / 2 - 130, 380, 260, 50, 10);
+
+  fill(255);
+  noStroke();
+  textSize(18);
+  text("Tentar Novamente", width / 2, 405);
+}
