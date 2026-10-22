@@ -178,3 +178,36 @@
 - Finalidade: Criação do *prompt* de geração vetorial para P5.js e auxílio na integração das funções do `Assets.js` nos ficheiros `UI.js` e `Player.js`.
 - Resultado utilizado: Código completo do `Assets.js` com as funções de desenho tridimensional e reestruturação do `Player.js` e `UI.js`.
 - Decisões minhas: Definir a lista de assets necessários para o tema do jogo, testar a integração dos scripts e validar o comportamento visual do ecossistema.
+
+---
+
+## Sessão 7 – 22 de outubro de 2026
+
+**Objetivo:** Ajustar a composição visual do leito marinho (perspetiva e profundidade), implementar o ciclo completo de níveis, ecrãs de transição, recompensa de tesouro, loja de melhorias e restauro dinâmico da cor dos corais.
+
+**Atividades realizadas:**
+- Reorganizei a composição do leito marinho em `UI.js`, criando uma planície de areia com relevo natural e dois planos de profundidade.
+- Inclinei o navio naufragado na diagonal (`rotate(0.22)`) e reduzi a sua escala (`scale(0.65)`) no segundo plano, sobrepondo uma camada de areia para criar o efeito de estar parcialmente enterrado ao fundo.
+- Desenvolvi a mecânica de progressão de níveis (1 a 5) no `sketch.js`, aumentando a quantidade de manchas de sujidade e ajustando o tempo limite em níveis mais avançados.
+- Programei o ecrã de Resultados/Fim de Nível (`desenhaFimNivel()`), calculando as moedas de ouro ganhas com base no nível e na percentagem de recife limpo.
+- Implementei o ecrã da Loja (`desenhaLoja()`), permitindo ao jogador gastar moedas em *upgrades* para a ferramenta de limpeza (jato mais largo e maior tolerância de pressão).
+- Criei o ecrã de Derrota/Game Over (`desenhaGameOver()`) caso o tempo esgoste com menos de 70% do recife limpo.
+- Corrigi a geração de sujidade em `Dirt.js` para associar manchas a todos os corais e implementei a restauração dinâmica da cor em `UI.js`: o coral é desenhado como branqueado enquanto tiver sujidade e recupera a cor viva assim que a última mancha é eliminada.
+- Documentei e enviei as alterações para o repositório GitHub através de *commits* dedicados.
+
+**Problemas:**
+- A sujidade estava a focar-se apenas nos corais do centro e os corais branqueados continuavam pálidos mesmo após serem completamente limpos.
+
+**Solução:**
+- Associei um identificador de coral (`idCoral`) a cada mancha de sujidade no `Dirt.js` para distribuir as algas por todos os 5 corais. No `UI.js`, passei a verificar em tempo real se ainda existem manchas ativas no coral; caso não existam, o jogo desenha a versão saudável e colorida (`drawCoralHealthy`).
+
+**Decisões:**
+- Inclinar o navio em segundo plano para dar maior destaque aos corais no primeiro plano.
+- Condicionar a passagem de nível a um mínimo de 70% de limpeza caso o tempo esgoste, incentivando o jogador a ser eficiente.
+- Associar a restauração visual do ecossistema ao progresso real de limpeza, reforçando a componente educativa do jogo.
+
+**Utilização de IA:**
+- Ferramenta: Gemini.
+- Finalidade: Apoio na reestruturação da máquina de estados do `sketch.js` para acomodar a loja e na lógica de verificação dinâmica do estado dos corais.
+- Resultado utilizado: Estrutura de botões da loja, controlo do tempo limite por nível e condicional de restauração de cor dos corais.
+- Decisões minhas: Definir o preço e impacto dos *upgrades*, ajustar a inclinação e posição do navio em segundo plano e organizar o fluxo entre níveis.
