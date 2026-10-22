@@ -1,12 +1,13 @@
-// Dirt.js - Gestao de Manchas de Sujidade/Algas focado nos Corais
+// Dirt.js - Gestão de Manchas de Sujidade com Associação a Todos os Corais
 
 class ManchaSujidade {
-  constructor(x, y, raio) {
+  constructor(x, y, raio, idCoral) {
     this.x = x;
     this.y = y;
     this.raioInicial = raio;
     this.raioAtual = raio;
     this.limpa = false;
+    this.idCoral = idCoral; // Guarda a qual coral esta mancha pertence
   }
 
   limpar(xLimpador, yLimpador, raioJato, dentroDaZonaIdeal) {
@@ -30,7 +31,6 @@ class ManchaSujidade {
 
     push();
     noStroke();
-    // Manchas verdes/castanhas de alga sobre o coral
     fill(35, 75, 25, 210);
     ellipse(this.x, this.y, this.raioAtual * 2, this.raioAtual * 1.6);
     fill(20, 50, 15, 180);
@@ -39,18 +39,15 @@ class ManchaSujidade {
   }
 }
 
-// Gera manchas de sujidade posicionadas estritamente sobre os corais
+// Gera manchas de sujidade espalhadas por TODOS os corais da cena
 function geraSujidadeAleatoria(quantidade) {
   let lista = [];
 
-  // Filtra apenas os corais que estão branqueados/sujos na UI
-  let coraisSujos = posicoesCorais.filter(c => c.eBranqueado);
-
   for (let i = 0; i < quantidade; i++) {
-    // Escolhe um dos corais branqueados aleatoriamente
-    let coralAlvo = random(coraisSujos);
+    // Escolhe qualquer um dos 5 corais
+    let idCoral = floor(random(0, posicoesCorais.length));
+    let coralAlvo = posicoesCorais[idCoral];
 
-    // Gera um desvio aleatório em torno da estrutura do coral
     let offsetX = random(-coralAlvo.size * 0.35, coralAlvo.size * 0.35);
     let offsetY = random(-coralAlvo.size * 0.5, -coralAlvo.size * 0.1);
 
@@ -58,7 +55,7 @@ function geraSujidadeAleatoria(quantidade) {
     let y = coralAlvo.y + offsetY;
     let r = random(12, 22);
 
-    lista.push(new ManchaSujidade(x, y, r));
+    lista.push(new ManchaSujidade(x, y, r, idCoral));
   }
 
   return lista;

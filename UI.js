@@ -24,11 +24,11 @@ function inicializaFundoAtivo() {
 
 // Posições fixas dos corais para que a sujidade consiga nascer exatamente sobre eles
 const posicoesCorais = [
-  { x: 260, y: 535, size: 70, type: 1, eBranqueado: false }, // Coral Rosa
-  { x: 360, y: 525, size: 80, type: 2, eBranqueado: true },  // Coral Laranja Ramificado (Sujo)
-  { x: 470, y: 530, size: 85, type: 1, eBranqueado: true },  // Coral Cérebro (Sujo)
-  { x: 580, y: 525, size: 75, type: 3, eBranqueado: true },  // Coral Leque (Sujo)
-  { x: 680, y: 530, size: 70, type: 2, eBranqueado: false }  // Coral Laranja
+  { x: 260, y: 535, size: 70, type: 1 }, // Coral 0 (Rosa / Brain)
+  { x: 360, y: 525, size: 80, type: 2 }, // Coral 1 (Laranja / Branching)
+  { x: 470, y: 530, size: 85, type: 1 }, // Coral 2 (Cérebro)
+  { x: 580, y: 525, size: 75, type: 3 }, // Coral 3 (Leque Púrpura)
+  { x: 680, y: 530, size: 70, type: 2 }  // Coral 4 (Laranja)
 ];
 
 // Fundo Marinho com Profundidade Aumentada e Navio Enterrado na Diagonal
@@ -108,8 +108,14 @@ function desenhaFundoMarinho() {
   endShape(CLOSE);
 
   // 7. CORAIS NO PRIMEIRO PLANO (Assentes firmemente no leito de areia)
-  for (let c of posicoesCorais) {
-    if (c.eBranqueado) {
+  // 7. CORAIS NO PRIMEIRO PLANO (Dinâmicos: Branqueados se tiverem sujidade, Vivos se estiverem limpos)
+  for (let i = 0; i < posicoesCorais.length; i++) {
+    let c = posicoesCorais[i];
+    
+    // Verifica se ainda existe alguma mancha de sujidade ativa neste coral
+    let temSujidade = listaSujidade.some(m => m.idCoral === i && !m.limpa);
+
+    if (temSujidade) {
       drawCoralBleached(c.x, c.y, c.size, c.type);
     } else {
       drawCoralHealthy(c.x, c.y, c.size, c.type);
