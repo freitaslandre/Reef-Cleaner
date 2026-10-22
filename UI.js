@@ -1,10 +1,9 @@
-// UI.js - Interface, HUD, Medidores, Fundo Marinho e Desenho de Assets
+// UI.js - Interface, HUD, Medidores, Fundo Marinho e Composicao de Assets
 
 let bolhasFundo = [];
 let peixesFundo = [];
 
 function inicializaFundoAtivo() {
-  // Bolhas de Fundo
   if (bolhasFundo.length === 0) {
     for (let i = 0; i < 25; i++) {
       bolhasFundo.push({
@@ -16,17 +15,25 @@ function inicializaFundoAtivo() {
     }
   }
 
-  // Peixes em Movimento
   if (peixesFundo.length === 0) {
-    peixesFundo.push({ x: 100, y: 180, speed: 1.2, size: 40, species: 1, dir: 1 });
-    peixesFundo.push({ x: 700, y: 260, speed: 0.9, size: 45, species: 2, dir: -1 });
-    peixesFundo.push({ x: 300, y: 340, speed: 1.5, size: 35, species: 3, dir: 1 });
+    peixesFundo.push({ x: 100, y: 150, speed: 1.2, size: 38, species: 1, dir: 1 });
+    peixesFundo.push({ x: 700, y: 220, speed: 0.9, size: 42, species: 2, dir: -1 });
+    peixesFundo.push({ x: 300, y: 280, speed: 1.4, size: 32, species: 3, dir: 1 });
   }
 }
 
-// Fundo Marinho Iluminado
+// Posições fixas dos corais para que a sujidade consiga nascer exatamente sobre eles
+const posicoesCorais = [
+  { x: 260, y: 535, size: 70, type: 1, eBranqueado: false }, // Coral Rosa
+  { x: 360, y: 525, size: 80, type: 2, eBranqueado: true },  // Coral Laranja Ramificado (Sujo)
+  { x: 470, y: 530, size: 85, type: 1, eBranqueado: true },  // Coral Cérebro (Sujo)
+  { x: 580, y: 525, size: 75, type: 3, eBranqueado: true },  // Coral Leque (Sujo)
+  { x: 680, y: 530, size: 70, type: 2, eBranqueado: false }  // Coral Laranja
+];
+
+// Fundo Marinho com Profundidade Aumentada e Navio Enterrado na Diagonal
 function desenhaFundoMarinho() {
-  // 1. Gradiente Água Turquesa Iluminada
+  // 1. Gradiente de Água Turquesa Iluminada
   for (let y = 0; y < height; y++) {
     let inter = map(y, 0, height, 0, 1);
     let c = lerpColor(color(40, 180, 220), color(15, 75, 120), inter);
@@ -45,10 +52,9 @@ function desenhaFundoMarinho() {
   vertex(450, 0); vertex(580, 0); vertex(720, height); vertex(520, height);
   endShape(CLOSE);
 
-  // 3. Bolhas e Peixes a Nadar
+  // 3. Bolhas e Peixes Animados no Espaço Aquático
   inicializaFundoAtivo();
 
-  // Bolhas
   fill(255, 255, 255, 80);
   noStroke();
   for (let b of bolhasFundo) {
@@ -61,7 +67,6 @@ function desenhaFundoMarinho() {
     }
   }
 
-  // Peixes Animados
   for (let p of peixesFundo) {
     p.x += p.speed * p.dir;
     if (p.x > width + 50) p.dir = -1;
@@ -69,32 +74,57 @@ function desenhaFundoMarinho() {
     drawFish(p.x, p.y, p.size, p.dir, p.species);
   }
 
-  // 4. Leito de Areia Dourada
-  fill(220, 195, 130);
+  // 4. PLANÍCIE / DUNA DE SEGUNDO PLANO (Ao Longe)
+  fill(180, 155, 105);
   noStroke();
-  ellipse(width / 2, height + 90, 980, 320);
+  beginShape();
+  vertex(0, 485);
+  bezierVertex(180, 475, 450, 495, width, 480);
+  vertex(width, height);
+  vertex(0, height);
+  endShape(CLOSE);
 
-  // 5. Assets Gráficos do Fundo (Navio, Conchas, Corais Vivos e Branqueados)
-  drawSunkenShipwreck(220, 520);
+  // 5. NAVIO NAUFRAGADO ENTERRADO NA DIAGONAL (Segundo Plano)
+  push();
+  translate(110, 475);   // Posiciona no leito traseiro
+  rotate(0.22);          // Inclina o navio na diagonal
+  scale(0.65);           // Reduz tamanho para profundidade realista
 
-  drawShell(340, 540, 25);
-  drawShell(680, 530, 20);
+  // Desenha o naufrágio com os assets de Assets.js
+  drawSunkenShipwreck(0, 0);
+  pop();
 
-  // Corais Saudáveis
-  drawCoralHealthy(380, 510, 65, 1);
-  drawCoralHealthy(460, 500, 75, 2);
-  drawCoralHealthy(640, 490, 70, 3);
+  // Camada de areia que "enterra" a proa/frente do navio
+  fill(180, 155, 105);
+  ellipse(130, 508, 180, 35);
 
-  // Corais Branqueados (A precisar de limpeza)
-  drawCoralBleached(530, 520, 80, 1);
-  drawCoralBleached(590, 510, 60, 2);
+  // 6. PLANÍCIE MARINHA DE PRIMEIRO PLANO (Areia Clara Principal)
+  fill(225, 200, 135);
+  beginShape();
+  vertex(0, 520);
+  bezierVertex(250, 510, 550, 515, width, 510);
+  vertex(width, height);
+  vertex(0, height);
+  endShape(CLOSE);
+
+  // 7. CORAIS NO PRIMEIRO PLANO (Assentes firmemente no leito de areia)
+  for (let c of posicoesCorais) {
+    if (c.eBranqueado) {
+      drawCoralBleached(c.x, c.y, c.size, c.type);
+    } else {
+      drawCoralHealthy(c.x, c.y, c.size, c.type);
+    }
+  }
+
+  // Conchas decorativas na areia
+  drawShell(180, 550, 20);
+  drawShell(510, 555, 22);
 }
 
 // ECRÃ INICIAL
 function desenhaInicio() {
   desenhaFundoMarinho();
 
-  // Título
   textAlign(CENTER, CENTER);
   textSize(48);
   fill(10, 40, 70, 150);
@@ -102,7 +132,6 @@ function desenhaInicio() {
   fill(255, 240, 180);
   text("REEF CLEANER", width / 2, 80);
 
-  // Cartão Principal de Instruções
   fill(10, 35, 60, 210);
   stroke(80, 200, 240, 180);
   strokeWeight(2);
@@ -114,7 +143,6 @@ function desenhaInicio() {
   textSize(16);
   text("Restaure o ecossistema limpando as algas e sedimentos dos corais!", width / 2, 175);
 
-  // Caixas de Controlo
   fill(20, 60, 95, 180);
   rect(width / 2 - 140, 250, 250, 80, 10);
   rect(width / 2 + 140, 250, 250, 80, 10);
@@ -133,7 +161,6 @@ function desenhaInicio() {
   textSize(14);
   text("Recolha moedas do tesouro do navio e complete 100% dos 5 níveis!", width / 2, 325);
 
-  // Botão "Calibrar e Jogar"
   let emCima = mouseX > width / 2 - 140 && mouseX < width / 2 + 140 &&
                mouseY > 410 - 28 && mouseY < 410 + 28;
 
@@ -231,7 +258,6 @@ function desenhaHUD() {
   text(`Tempo: ${ceil(tempoRestante)}s`, 120, 25);
   text(`Limpo: ${percentagemLimpa.toFixed(1)}%`, 240, 25);
 
-  // Ícone de Moeda do Tesouro
   drawGoldCoin(375, 25, 10);
   fill(255, 220, 80);
   textSize(15);
