@@ -84,19 +84,24 @@ function desenhaFundoMarinho() {
   vertex(0, height);
   endShape(CLOSE);
 
-  // 5. NAVIO NAUFRAGADO ENTERRADO NA DIAGONAL (Segundo Plano)
+  // 5. NAVIO NAUFRAGADO ENTERRADO PROFUNDAMENTE (Segundo Plano)
   push();
-  translate(110, 475);   // Posiciona no leito traseiro
-  rotate(0.22);          // Inclina o navio na diagonal
-  scale(0.65);           // Reduz tamanho para profundidade realista
+  translate(100, 490);   // Afunda o navio mais para baixo
+  rotate(0.32);          // Maior inclinação diagonal (proa afundada)
+  scale(0.65);
 
-  // Desenha o naufrágio com os assets de Assets.js
   drawSunkenShipwreck(0, 0);
   pop();
 
-  // Camada de areia que "enterra" a proa/frente do navio
+  // Duna de Areia de Sobreposição para "enterrar" a parte da frente do barco
   fill(180, 155, 105);
-  ellipse(130, 508, 180, 35);
+  noStroke();
+  beginShape();
+  vertex(120, 500);
+  bezierVertex(170, 485, 220, 495, 260, 510);
+  vertex(260, 530);
+  vertex(120, 530);
+  endShape(CLOSE);
 
   // 6. PLANÍCIE MARINHA DE PRIMEIRO PLANO (Areia Clara Principal)
   fill(225, 200, 135);

@@ -250,9 +250,10 @@ function drawSunkenShipwreck(x, y) {
     _seaweedBlade(wx, 8, -46 - i * 7, (i % 2 ? -6 : 6), weedCol, weedDark);
   }
 
-  // ---- Treasure chest beside the ship ----
+ // ---- Treasure chest on the deck ----
   push();
-  translate(-205, -2);
+  translate(-35, -62); // Posiciona o baú de tesouro em cima do convés principal do navio
+  scale(0.85);          // Ajusta a escala para encaixar no navio
 
   // Golden glow behind chest
   _glow(0, -22, 62, "rgba(255, 220, 90, 0.55)", "rgba(255, 220, 90, 0)");
