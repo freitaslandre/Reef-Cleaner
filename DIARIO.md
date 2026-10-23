@@ -211,3 +211,37 @@
 - Finalidade: Apoio na reestruturação da máquina de estados do `sketch.js` para acomodar a loja e na lógica de verificação dinâmica do estado dos corais.
 - Resultado utilizado: Estrutura de botões da loja, controlo do tempo limite por nível e condicional de restauração de cor dos corais.
 - Decisões minhas: Definir o preço e impacto dos *upgrades*, ajustar a inclinação e posição do navio em segundo plano e organizar o fluxo entre níveis.
+
+---
+
+## Sessão 8 – 22 de outubro de 2026
+
+**Objetivo:** Refinar o posicionamento visual da ferramenta de limpeza, ajustar o cenário do navio afundado e corrigir a lógica de reinício de nível e o fluxo de navegação da loja.
+
+**Atividades realizadas:**
+- Ajustei o alinhamento da ferramenta de limpeza em `Player.js`: posicionei-a do lado direito do cursor do rato, espelhada horizontalmente (`scale(-1, 1)`), garantindo que o círculo de ação do jato fica exatamente sobre a coordenada `(mouseX, mouseY)`.
+- Adicionei o botão de acesso à **🛒 Loja** no HUD superior em `UI.js`, permitindo abrir a loja em pleno jogo e pausando o temporizador do nível durante as compras.
+- Reposicionei o baú do tesouro no `Assets.js` para o convés principal do navio naufragado e inclinei a embarcação (`rotate(0.32)`) em `UI.js`, sobrepondo uma duna de areia para dar o efeito de ter a proa enterrada no fundo do mar.
+- Corrigi a lógica de reinício em `sketch.js`: a função `iniciaNivel()` passou a recriar e redefinir do zero as manchas de sujidade e o estado dos corais ao clicar em "Tentar Novamente".
+- Refiz o fluxo de navegação da loja: ao aceder à loja após concluir um nível, o botão de saída passa a indicar "Voltar aos Resultados", regressando ao ecrã de fim de nível em vez de avançar automaticamente para o nível seguinte.
+- Documentei e enviei o progresso para o repositório GitHub através de *commits* incrementais.
+
+**Problemas:**
+- A ferramenta de limpeza ficava desenhada sobre o centro da área de ação do jato e invertida.
+- Ao clicar em "Tentar Novamente", o nível mantinha o progresso de limpeza anterior sem reiniciar as manchas de sujidade.
+- A saída da loja no ecrã pós-nível forçava o início imediato do nível seguinte sem permitir ao jogador rever as opções.
+
+**Solução:**
+- Reorganizei a translação do bocal no `Player.js` para deslocar a ferramenta 50px à direita do rato com espelhamento horizontal.
+- Garanti que a lista `listaSujidade` é completamente esvaziada e reinstanciada dentro da função `iniciaNivel()`.
+- Criei a variável `estadoAnteriorLoja` para registar a origem do jogador e redefinir o botão de saída da loja dinamicamente em `UI.js` e `sketch.js`.
+
+**Decisões:**
+- Permitir a abertura da loja em dois momentos (durante a execução do nível e no ecrã de resultados pós-nível) para dar maior flexibilidade e fluidez à jogabilidade.
+- Afundar e inclinar o navio em segundo plano com sobreposição de areia para reforçar a profundidade e o realismo do ecossistema marinho.
+
+**Utilização de IA:**
+- Ferramenta: Gemini.
+- Finalidade: Apoio na transformação geométrica do bocal em P5.js, ajuste da duna de areia sobre a proa do navio e reestruturação da lógica de fluxo da loja.
+- Resultado utilizado: Código de espelhamento do bocal em `Player.js`, coordenadas do baú no convés em `Assets.js` e navegação condicional em `sketch.js`.
+- Decisões minhas: Definir a posição exata da ferramenta em relação ao ponteiro do rato, validar visualmente o enquadramento do navio e ajustar a usabilidade dos botões da loja.
