@@ -246,6 +246,7 @@ function processaCalibracao() {
 }
 
 // HUD Superior
+// HUD Superior com Botão de Acesso à Loja
 function desenhaHUD() {
   fill(10, 35, 60, 210);
   noStroke();
@@ -261,16 +262,37 @@ function desenhaHUD() {
   textAlign(LEFT, CENTER);
   textSize(15);
   text(`Nível: ${nivelAtual}`, 20, 25);
-  text(`Tempo: ${ceil(tempoRestante)}s`, 120, 25);
-  text(`Limpo: ${percentagemLimpa.toFixed(1)}%`, 240, 25);
+  text(`Tempo: ${ceil(tempoRestante)}s`, 110, 25);
+  text(`Limpo: ${percentagemLimpa.toFixed(1)}%`, 210, 25);
 
-  drawGoldCoin(375, 25, 10);
+  // Ícone de Moeda do Tesouro
+  drawGoldCoin(340, 25, 10);
   fill(255, 220, 80);
   textSize(15);
-  text(`Tesouro: ${moedas}`, 395, 25);
+  text(`${moedas}`, 358, 25);
+
+  // BOTÃO DA LOJA NO HUD (Área clicável: X entre 420 e 510, Y entre 10 e 40)
+  let emCimaLoja = mouseX > 420 && mouseX < 510 && mouseY > 10 && mouseY < 40;
+  
+  if (emCimaLoja) {
+    fill(60, 180, 240);
+    stroke(255);
+  } else {
+    fill(30, 90, 140);
+    stroke(80, 200, 240);
+  }
+  strokeWeight(1.5);
+  rect(420, 10, 90, 30, 6);
 
   fill(255);
-  text(`Saúde Recife: ${saudeRecife}%`, 530, 25);
+  noStroke();
+  textAlign(CENTER, CENTER);
+  textSize(13);
+  text("🛒 Loja", 465, 25);
+
+  textAlign(LEFT, CENTER);
+  fill(255);
+  text(`Saúde Recife: ${saudeRecife}%`, 535, 25);
 }
 
 // Medidor Vertical do Microfone

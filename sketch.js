@@ -26,6 +26,7 @@ let tempoLimiteNivel = 60;
 let percentagemLimpa = 0.0;
 let saudeRecife = 100;
 let cronometroJogo = 0;
+let tempoPausadoNaLoja = 0;
 
 // Upgrades da Loja
 let upgradeLargo = 0;       // Aumenta o raio do jato
@@ -209,17 +210,22 @@ function mousePressed() {
       cronometroCalib = millis();
       estado = "calibrando";
     }
-  } else if (estado === "fimNivel") {
-    // Botão "Ir para a Loja"
-    if (mouseX > width / 2 - 210 && mouseX < width / 2 - 10 && mouseY > 400 && mouseY < 450) {
+  } else if (estado === "execucao") {
+    // Clique no Botão "🛒 Loja" do HUD durante o jogo
+    if (mouseX > 420 && mouseX < 510 && mouseY > 10 && mouseY < 40) {
+      tempoPausadoNaLoja = millis(); // Regista o momento em que a loja foi aberta
       estado = "loja";
     }
-    // Botão "Próximo Nível"
+  } else if (estado === "fimNivel") {
+    if (mouseX > width / 2 - 210 && mouseX < width / 2 - 10 && mouseY > 400 && mouseY < 450) {
+      tempoPausadoNaLoja = millis();
+      estado = "loja";
+    }
     if (mouseX > width / 2 + 10 && mouseX < width / 2 + 210 && mouseY > 400 && mouseY < 450) {
       if (nivelAtual < totalNiveis) {
         iniciaNivel(nivelAtual + 1);
       } else {
-        estado = "inicio"; // Jogo Concluído!
+        estado = "inicio";
       }
     }
   } else if (estado === "loja") {
@@ -237,16 +243,23 @@ function mousePressed() {
         upgradeTolerancia++;
       }
     }
-    // Botão "Continuar Jogo"
+    // Botão "Voltar ao Jogo"
     if (mouseX > width / 2 - 120 && mouseX < width / 2 + 120 && mouseY > 440 && mouseY < 490) {
-      if (nivelAtual < totalNiveis) {
-        iniciaNivel(nivelAtual + 1);
+      // Compensa o tempo passado dentro da loja para não penalizar o temporizador
+      if (tempoPausadoNaLoja > 0) {
+        let duracaoLoja = millis() - tempoPausadoNaLoja;
+        cronometroJogo += duracaoLoja; 
+        tempoPausadoNaLoja = 0;
+      }
+      
+      // Se estivesse em jogo, regressa ao jogo; caso contrário avança de nível
+      if (percentagemLimpa < 100 && tempoRestante > 0) {
+        estado = "execucao";
       } else {
-        iniciaNivel(1);
+        iniciaNivel(nivelAtual < totalNiveis ? nivelAtual + 1 : 1);
       }
     }
   } else if (estado === "gameOver") {
-    // Botão "Tentar Novamente"
     if (mouseX > width / 2 - 130 && mouseX < width / 2 + 130 && mouseY > 380 && mouseY < 430) {
       iniciaNivel(nivelAtual);
     }
