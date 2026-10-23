@@ -459,14 +459,19 @@ function desenhaLoja() {
   textSize(15);
   text(upgradeTolerancia >= 3 ? "MÁXIMO" : "Comprar (20 M)", width / 2 + 130, 352);
 
-  // Botão Voltar ao Jogo
+  // Botão Voltar (Ajusta o texto dinamicamente consoante a origem)
   fill(40, 140, 200);
   stroke(255);
   rect(width / 2 - 120, 440, 240, 50, 10);
   fill(255);
   noStroke();
   textSize(18);
-  text("Continuar Jogo", width / 2, 465);
+  
+  if (typeof estadoAnteriorLoja !== "undefined" && estadoAnteriorLoja === "fimNivel") {
+    text("Voltar aos Resultados", width / 2, 465);
+  } else {
+    text("Voltar ao Jogo", width / 2, 465);
+  }
 }
 
 // ECRÃ DE GAME OVER / DERROTA

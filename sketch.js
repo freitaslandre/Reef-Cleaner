@@ -31,6 +31,7 @@ let tempoPausadoNaLoja = 0;
 // Upgrades da Loja
 let upgradeLargo = 0;       // Aumenta o raio do jato
 let upgradeTolerancia = 0;  // Alarga a faixa verde ideal
+let estadoAnteriorLoja = "execucao"; // Guarda se veio de "execucao" ou "fimNivel"
 
 // Objetos e Listas
 let limpador;
@@ -213,16 +214,19 @@ function mousePressed() {
       estado = "calibrando";
     }
   } else if (estado === "execucao") {
-    // Clique no Botão "🛒 Loja" do HUD durante o jogo
+    // Clique no botão "🛒 Loja" do HUD durante o jogo
     if (mouseX > 420 && mouseX < 510 && mouseY > 10 && mouseY < 40) {
-      tempoPausadoNaLoja = millis(); // Regista o momento em que a loja foi aberta
+      tempoPausadoNaLoja = millis();
+      estadoAnteriorLoja = "execucao";
       estado = "loja";
     }
   } else if (estado === "fimNivel") {
+    // Ir para a Loja a partir do ecrã de Fim de Nível
     if (mouseX > width / 2 - 210 && mouseX < width / 2 - 10 && mouseY > 400 && mouseY < 450) {
-      tempoPausadoNaLoja = millis();
+      estadoAnteriorLoja = "fimNivel";
       estado = "loja";
     }
+    // Botão "Próximo Nível" / "Menu Inicial"
     if (mouseX > width / 2 + 10 && mouseX < width / 2 + 210 && mouseY > 400 && mouseY < 450) {
       if (nivelAtual < totalNiveis) {
         iniciaNivel(nivelAtual + 1);
@@ -231,34 +235,33 @@ function mousePressed() {
       }
     }
   } else if (estado === "loja") {
-    // Upgrade 1: Jato Mais Largo (Preço: 15 moedas)
+    // Upgrade 1: Jato Mais Largo (15 moedas)
     if (mouseX > width / 2 - 240 && mouseX < width / 2 - 20 && mouseY > 330 && mouseY < 375) {
       if (moedas >= 15 && upgradeLargo < 3) {
         moedas -= 15;
         upgradeLargo++;
       }
     }
-    // Upgrade 2: Tolerância de Pressão (Preço: 20 moedas)
+    // Upgrade 2: Tolerância de Pressão (20 moedas)
     if (mouseX > width / 2 + 20 && mouseX < width / 2 + 240 && mouseY > 330 && mouseY < 375) {
       if (moedas >= 20 && upgradeTolerancia < 3) {
         moedas -= 20;
         upgradeTolerancia++;
       }
     }
-    // Botão "Voltar ao Jogo"
+    // Botão de Saída da Loja
     if (mouseX > width / 2 - 120 && mouseX < width / 2 + 120 && mouseY > 440 && mouseY < 490) {
-      // Compensa o tempo passado dentro da loja para não penalizar o temporizador
-      if (tempoPausadoNaLoja > 0) {
-        let duracaoLoja = millis() - tempoPausadoNaLoja;
-        cronometroJogo += duracaoLoja; 
-        tempoPausadoNaLoja = 0;
-      }
-      
-      // Se estivesse em jogo, regressa ao jogo; caso contrário avança de nível
-      if (percentagemLimpa < 100 && tempoRestante > 0) {
+      if (estadoAnteriorLoja === "execucao") {
+        // Regressa à partida em curso e repõe o temporizador
+        if (tempoPausadoNaLoja > 0) {
+          let duracaoLoja = millis() - tempoPausadoNaLoja;
+          cronometroJogo += duracaoLoja;
+          tempoPausadoNaLoja = 0;
+        }
         estado = "execucao";
       } else {
-        iniciaNivel(nivelAtual < totalNiveis ? nivelAtual + 1 : 1);
+        // Regressa ao ecrã de Fim de Nível sem iniciar o próximo nível automaticamente
+        estado = "fimNivel";
       }
     }
   } else if (estado === "gameOver") {
