@@ -1,4 +1,4 @@
-// Player.js - Ferramenta Limpadora com Integração de Assets
+// Player.js - Ferramenta Limpadora posicionada à direita a apontar para o círculo
 
 class Limpador {
   constructor() {
@@ -16,21 +16,26 @@ class Limpador {
 
     let ativa = this.intensidadeJato >= limiteMinimo;
 
-    // Jato de Água / Pressão (Efeito Visual)
+    // 1. Círculo do Jato de Água exato sobre a posição do rato (mouseX, mouseY)
     if (ativa) {
       let tamanhoJato = map(this.intensidadeJato, limiteMinimo, 1, 40, 110);
 
       if (this.intensidadeJato >= faixaIdealMin && this.intensidadeJato <= faixaIdealMax) {
         fill(100, 220, 255, 140); // Pressão Ideal Suave
       } else {
-        fill(255, 90, 90, 160);  // Pressão Demasiado Forte
+        fill(255, 90, 90, 160);  // Pressão Excessiva
       }
 
       noStroke();
-      ellipse(x + 25, y, tamanhoJato, tamanhoJato);
+      ellipse(x, y, tamanhoJato, tamanhoJato);
     }
 
-    // Desenha a Ferramenta Limpadora Usando o Asset em P5.js
-    drawCleanerNozzle(x, y, this.tamanho, ativa);
+    // 2. Desenha a ferramenta do LADO DIREITO, espelhada horizontalmente
+    // para que a ponta do bocal fique junto à borda do círculo e a apontar para a esquerda (para o rato)
+    push();
+    translate(x + 50, y);  // Posiciona o ponto de origem 50px à direita do rato
+    scale(-1, 1);          // Inverte horizontalmente para a ferramenta apontar para a esquerda
+    drawCleanerNozzle(0, 0, this.tamanho, ativa);
+    pop();
   }
 }
