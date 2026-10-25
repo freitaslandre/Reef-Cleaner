@@ -72,9 +72,9 @@ function iniciaNivel(numNivel) {
   tempoRestante = tempoLimiteNivel;
   percentagemLimpa = 0.0;
 
-  // Garante que a lista de sujidade é completamente limpa e recriada
+  // Aumenta a quantidade e o tamanho inicial das manchas de sujidade
   listaSujidade = [];
-  let qtdSujidade = 10 + nivelAtual * 5;
+  let qtdSujidade = 14 + nivelAtual * 6; // Anteriormente 10 + nivelAtual * 5
   listaSujidade = geraSujidadeAleatoria(qtdSujidade);
 
   // Recalcula o total inicial exato das novas manchas

@@ -409,13 +409,14 @@ function drawGoldCoin(x, y, radius) {
 }
 
 /* ------------------------------------------------------------------ */
-/* 3. Healthy Coral                                                    */
+/* 3. Healthy Coral                                                   */
 /* ------------------------------------------------------------------ */
 
 function drawCoralHealthy(x, y, size, type) {
   push();
   translate(x, y);
-  scale(size / 100);
+  // Aumentado o fator de escala (multiplicado por 2.2 para dar mais do dobro do tamanho)
+  scale((size * 2.2) / 100);
   _coralBody(type, {
     base: color(255, 90, 160),
     light: color(255, 160, 205),
@@ -431,13 +432,14 @@ function drawCoralHealthy(x, y, size, type) {
 }
 
 /* ------------------------------------------------------------------ */
-/* 4. Bleached Coral                                                   */
+/* 4. Bleached Coral                                                  */
 /* ------------------------------------------------------------------ */
 
 function drawCoralBleached(x, y, size, type) {
   push();
   translate(x, y);
-  scale(size / 100);
+  // Aumentado o fator de escala (multiplicado por 2.2 para coincidir com o saudável)
+  scale((size * 2.2) / 100);
   const bleached = {
     base: color(212, 210, 200),
     light: color(240, 238, 230),
