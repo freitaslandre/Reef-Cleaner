@@ -43,19 +43,22 @@ class ManchaSujidade {
 function geraSujidadeAleatoria(quantidade) {
   let lista = [];
 
-  for (let i = 0; i < quantidade; i++) {
-    // Escolhe qualquer um dos 5 corais
+  // Aumentamos a quantidade de manchas para cobrir os corais grandes com detalhes pequenos
+  let qtdAjustada = quantidade + 8; 
+
+  for (let i = 0; i < qtdAjustada; i++) {
     let idCoral = floor(random(0, posicoesCorais.length));
     let coralAlvo = posicoesCorais[idCoral];
 
-    // Dispersão alargada para cobrir a nova largura e altura maiores do coral (escala 2.2x)
-    let offsetX = random(-coralAlvo.size * 0.75, coralAlvo.size * 0.75);
-    let offsetY = random(-coralAlvo.size * 1.1, -coralAlvo.size * 0.2);
+    // Dispersão adaptada à escala 2.2x (espala-se na largura e sobe pelo corpo do coral)
+    let offsetX = random(-coralAlvo.size * 0.7, coralAlvo.size * 0.7);
+    let offsetY = random(-coralAlvo.size * 1.5, -coralAlvo.size * 0.2);
 
-    // Raio da mancha aumentado (de 12-22 para 24-42) para acompanhar a nova escala
     let x = coralAlvo.x + offsetX;
     let y = coralAlvo.y + offsetY;
-    let r = random(24, 42);
+    
+    // Manchas pequenas (raio 10 a 16px) em vez das manchas gigantes de 40px
+    let r = random(10, 16);
 
     lista.push(new ManchaSujidade(x, y, r, idCoral));
   }

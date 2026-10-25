@@ -24,11 +24,11 @@ function inicializaFundoAtivo() {
 
 // Posições fixas dos corais para que a sujidade consiga nascer exatamente sobre eles
 const posicoesCorais = [
-  { x: 260, y: 535, size: 70, type: 1 }, // Coral 0 (Rosa / Brain)
-  { x: 360, y: 525, size: 80, type: 2 }, // Coral 1 (Laranja / Branching)
-  { x: 470, y: 530, size: 85, type: 1 }, // Coral 2 (Cérebro)
-  { x: 580, y: 525, size: 75, type: 3 }, // Coral 3 (Leque Púrpura)
-  { x: 680, y: 530, size: 70, type: 2 }  // Coral 4 (Laranja)
+  { x: 260, y: 520, size: 45, type: 1 }, // Coral Cérebro (perto do barco)
+  { x: 375, y: 525, size: 50, type: 2 }, // Coral Ramificado
+  { x: 490, y: 520, size: 45, type: 1 }, // Coral Cérebro (centro)
+  { x: 605, y: 525, size: 50, type: 3 }, // Coral Leque
+  { x: 715, y: 525, size: 48, type: 2 }  // Coral Ramificado (direita)
 ];
 
 // Fundo Marinho com Profundidade Aumentada e Navio Enterrado na Diagonal
