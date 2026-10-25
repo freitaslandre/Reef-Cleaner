@@ -507,3 +507,47 @@ function desenhaGameOver() {
   textSize(18);
   text("Tentar Novamente", width / 2, 405);
 }
+
+// ECRÃ DE VITÓRIA FINAL (PARABÉNS - JOGO CONCLUÍDO)
+function desenhaVitoriaFinal() {
+  desenhaFundoMarinho();
+
+  fill(10, 35, 60, 230);
+  stroke(255, 215, 0, 220);
+  strokeWeight(3);
+  rectMode(CENTER);
+  rect(width / 2, height / 2, 580, 340, 15);
+
+  textAlign(CENTER, CENTER);
+  fill(255, 220, 80);
+  textSize(34);
+  text("🏆 PARABÉNS! 🏆", width / 2, height / 2 - 110);
+
+  fill(255);
+  textSize(22);
+  text("Completou com sucesso todos os níveis!", width / 2, height / 2 - 50);
+
+  textSize(16);
+  fill(180, 230, 255);
+  text("O recife de corais está totalmente limpo e restaurado.", width / 2, height / 2 - 15);
+
+  // Exibe o Tesouro Total Acumulado
+  drawGoldCoin(width / 2 - 80, height / 2 + 30, 14);
+  fill(255, 215, 0);
+  textSize(22);
+  text(`Tesouro Total: ${moedas} Moedas`, width / 2 + 20, height / 2 + 30);
+
+  // Botão Voltar ao Menu Inicial
+  rectMode(CORNER);
+  let emCimaBtn = mouseX > width / 2 - 120 && mouseX < width / 2 + 120 && mouseY > 410 && mouseY < 460;
+  
+  fill(emCimaBtn ? color(60, 230, 150) : color(40, 180, 110));
+  stroke(255);
+  strokeWeight(2);
+  rect(width / 2 - 120, 410, 240, 50, 10);
+
+  fill(255);
+  noStroke();
+  textSize(18);
+  text("🏠 Menu Inicial", width / 2, 435);
+}

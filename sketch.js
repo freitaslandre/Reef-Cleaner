@@ -55,6 +55,8 @@ function draw() {
     executaJogo();
   } else if (estado === "fimNivel") {
     desenhaFimNivel();
+  } else if (estado === "vitoriaFinal") {
+    desenhaVitoriaFinal();
   } else if (estado === "loja") {
     desenhaLoja();
   } else if (estado === "gameOver") {
@@ -143,10 +145,15 @@ function executaJogo() {
 
 function concluiNivel(sucesso) {
   if (sucesso) {
-    // Recompensa de moedas proporcional à percentagem limpa e nível
     let moedasGanha = floor((percentagemLimpa / 10) * nivelAtual);
     moedas += moedasGanha;
-    estado = "fimNivel";
+
+    // Se concluiu o último nível, vai para o ecrã especial de vitória final
+    if (nivelAtual >= totalNiveis) {
+      estado = "vitoriaFinal";
+    } else {
+      estado = "fimNivel";
+    }
   } else {
     estado = "gameOver";
   }
@@ -267,6 +274,12 @@ function mousePressed() {
   } else if (estado === "gameOver") {
     if (mouseX > width / 2 - 130 && mouseX < width / 2 + 130 && mouseY > 380 && mouseY < 430) {
       iniciaNivel(nivelAtual);
+    }
+  } else if (estado === "vitoriaFinal") {
+    // Clique no Botão "🏠 Menu Inicial"
+    if (mouseX > width / 2 - 120 && mouseX < width / 2 + 120 && mouseY > 410 && mouseY < 460) {
+      nivelAtual = 1;
+      estado = "inicio";
     }
   }
 }
