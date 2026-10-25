@@ -159,6 +159,18 @@ function concluiNivel(sucesso) {
   }
 }
 
+// Restaura o estado global do jogo para um novo começo
+// Restaura o estado global do jogo para um novo começo (Nível 1 de raiz)
+function resetaJogoCompleto() {
+  nivelAtual = 1;
+  moedas = 0;
+  upgradeLargo = 0;
+  upgradeTolerancia = 0;
+  percentagemLimpa = 0.0;
+  tempoLimiteNivel = 60; // Repõe o tempo inicial para 60 segundos
+  tempoRestante = 60;
+}
+
 function processaCalibracao() {
   let volumeAtual = mic.getLevel();
   somaRuido += volumeAtual;
@@ -205,6 +217,7 @@ function processaCalibracao() {
     faixaIdealMin = limiteMinimo + 0.08;
     faixaIdealMax = limiteMinimo + 0.28;
 
+    resetaJogoCompleto(); // Garante moedas=0 e upgrades=0 no arranque
     iniciaNivel(1);
   }
 }
@@ -228,7 +241,7 @@ function mousePressed() {
       estado = "loja";
     }
   } else if (estado === "fimNivel") {
-    // Ir para a Loja a partir do ecrã de Fim de Nível
+    // Ir para a Loja
     if (mouseX > width / 2 - 210 && mouseX < width / 2 - 10 && mouseY > 400 && mouseY < 450) {
       estadoAnteriorLoja = "fimNivel";
       estado = "loja";
@@ -238,6 +251,7 @@ function mousePressed() {
       if (nivelAtual < totalNiveis) {
         iniciaNivel(nivelAtual + 1);
       } else {
+        resetaJogoCompleto();
         estado = "inicio";
       }
     }
@@ -278,7 +292,7 @@ function mousePressed() {
   } else if (estado === "vitoriaFinal") {
     // Clique no Botão "🏠 Menu Inicial"
     if (mouseX > width / 2 - 120 && mouseX < width / 2 + 120 && mouseY > 410 && mouseY < 460) {
-      nivelAtual = 1;
+      resetaJogoCompleto();
       estado = "inicio";
     }
   }
