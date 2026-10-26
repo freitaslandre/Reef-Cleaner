@@ -351,7 +351,7 @@ function desenhaModalRecompensas() {
 }
 
 // Medidor Vertical do Microfone
-function desenhaMedidorMicrofone(volAtual) {
+function desenhaMedidorMicrofone(volAtual, tolMin = faixaIdealMin, tolMax = faixaIdealMax) {
   let x = width - 55;
   let y = 65;
   let alt = 240;
@@ -363,8 +363,8 @@ function desenhaMedidorMicrofone(volAtual) {
   rectMode(CORNER);
   rect(x, y, larg, alt, 6);
 
-  let yIdealMin = map(faixaIdealMax, 0, 1, y + alt, y);
-  let yIdealMax = map(faixaIdealMin, 0, 1, y + alt, y);
+  let yIdealMin = map(constrain(tolMax, 0, 1), 0, 1, y + alt, y);
+  let yIdealMax = map(constrain(tolMin, 0, 1), 0, 1, y + alt, y);
   noStroke();
   fill(50, 230, 120, 160);
   rect(x, yIdealMin, larg, yIdealMax - yIdealMin);
@@ -374,7 +374,7 @@ function desenhaMedidorMicrofone(volAtual) {
 
   if (volAtual < limiteMinimo) {
     fill(100, 180, 255);
-  } else if (volAtual >= faixaIdealMin && volAtual <= faixaIdealMax) {
+  } else if (volAtual >= tolMin && volAtual <= tolMax) {
     fill(50, 255, 130);
   } else {
     fill(255, 75, 75);
@@ -392,6 +392,23 @@ function desenhaMedidorMicrofone(volAtual) {
   textSize(11);
   textAlign(CENTER, TOP);
   text("Micro", x + larg / 2, y + alt + 8);
+}
+
+function desenhaRecompensaPartida(y, tamanhoTexto) {
+  let frase = `Ganhaste ${moedasGanhasNaPartida} moedas nesta partida`;
+  let diametroMoeda = 28;
+  let espaco = 8;
+  textSize(tamanhoTexto);
+  let larguraTexto = textWidth(frase);
+  let larguraTotal = diametroMoeda + espaco + larguraTexto;
+  let inicio = width / 2 - larguraTotal / 2;
+
+  drawGoldCoin(inicio + diametroMoeda / 2, y, diametroMoeda / 2);
+  noStroke();
+  fill(255, 215, 0);
+  textAlign(LEFT, CENTER);
+  text(frase, inicio + diametroMoeda + espaco, y);
+  textAlign(CENTER, CENTER);
 }
 
 // ECRÃ DE FIM DE NÍVEL (RESULTADOS & RECOMPENSA)
@@ -418,13 +435,7 @@ function desenhaFimNivel() {
   textSize(17);
   text(`Saúde do recife: ${saudeRecife.toFixed(0)}%`, width / 2, 210);
 
-  drawGoldCoin(width / 2 - 205, 245, 14);
-  noStroke();
-  fill(255, 215, 0);
-  textAlign(LEFT, CENTER);
-  textSize(19);
-  text(`Ganhaste ${moedasGanhasNaPartida} moedas nesta partida`, width / 2 - 184, 245);
-  textAlign(CENTER, CENTER);
+  desenhaRecompensaPartida(245, 19);
 
   if (saudeRecife < 50) {
     fill(255, 100, 100);
@@ -505,7 +516,7 @@ function desenhaLoja() {
   for (let i = 0; i < 5; i++) {
     fill(i < upgradeLargo ? color(255, 210, 60) : color(70, 90, 110));
     rectMode(CORNER);
-    rect(width / 2 - 170 + i * 20, 270, 15, 8, 3);
+    rect(width / 2 - 177.5 + i * 20, 270, 15, 8, 3);
   }
   fill(180, 220, 255);
   text("Aumenta o raio de alcance", width / 2 - 130, 300);
@@ -539,7 +550,7 @@ function desenhaLoja() {
   for (let i = 0; i < 5; i++) {
     fill(i < upgradeTolerancia ? color(255, 210, 60) : color(70, 90, 110));
     rectMode(CORNER);
-    rect(width / 2 + 90 + i * 20, 270, 15, 8, 3);
+    rect(width / 2 + 82.5 + i * 20, 270, 15, 8, 3);
   }
   fill(180, 220, 255);
   text("Alarga a faixa de pressão ideal", width / 2 + 130, 300);
@@ -591,13 +602,7 @@ function desenhaGameOver() {
   fill(saudeRecife < 50 ? color(255, 100, 100) : color(190, 230, 255));
   textSize(16);
   text(`Saúde do recife: ${saudeRecife.toFixed(0)}%`, width / 2, 248);
-  drawGoldCoin(width / 2 - 205, 280, 12);
-  noStroke();
-  fill(255, 215, 0);
-  textAlign(LEFT, CENTER);
-  textSize(17);
-  text(`Ganhaste ${moedasGanhasNaPartida} moedas nesta partida`, width / 2 - 184, 280);
-  textAlign(CENTER, CENTER);
+  desenhaRecompensaPartida(280, 17);
   if (saudeRecife < 50) {
     fill(255, 100, 100);
     textSize(14);
@@ -744,16 +749,35 @@ function desenhaSelecaoNiveis() {
     }
   }
 
-  // Botão Voltar ao Menu
   rectMode(CORNER);
-  let emCimaVoltar = mouseX > width / 2 - 100 && mouseX < width / 2 + 100 && mouseY > 460 && mouseY < 505;
-  fill(emCimaVoltar ? color(70, 190, 240) : color(35, 130, 185));
-  stroke(255);
-  strokeWeight(2);
-  rect(width / 2 - 100, 460, 200, 45, 10);
+  if (origemSelecaoNiveis === "jogo") {
+    let hoverJogo = mouseX > 170 && mouseX < 390 && mouseY > 460 && mouseY < 510;
+    fill(hoverJogo ? color(70, 190, 240) : color(35, 130, 185));
+    stroke(255);
+    strokeWeight(2);
+    rect(170, 460, 220, 50, 10);
+    fill(255);
+    noStroke();
+    textSize(16);
+    text("▶ Voltar ao Jogo", 280, 485);
 
-  noStroke();
-  fill(255);
-  textSize(16);
-  text("← Voltar ao Menu", width / 2, 482);
+    let hoverMenu = mouseX > 410 && mouseX < 630 && mouseY > 460 && mouseY < 510;
+    fill(hoverMenu ? color(70, 190, 240) : color(35, 130, 185));
+    stroke(255);
+    strokeWeight(2);
+    rect(410, 460, 220, 50, 10);
+    fill(255);
+    noStroke();
+    text("🏠 Voltar ao Menu", 520, 485);
+  } else {
+    let hoverVoltar = mouseX > width / 2 - 100 && mouseX < width / 2 + 100 && mouseY > 460 && mouseY < 505;
+    fill(hoverVoltar ? color(70, 190, 240) : color(35, 130, 185));
+    stroke(255);
+    strokeWeight(2);
+    rect(width / 2 - 100, 460, 200, 45, 10);
+    noStroke();
+    fill(255);
+    textSize(16);
+    text("← Voltar ao Menu", width / 2, 482);
+  }
 }

@@ -32,6 +32,8 @@ let cronometroJogo = 0;
 let tempoPausadoNaLoja = 0;
 let nivelMaximoDesbloqueado = 1; // Controla o progresso máximo já atingido
 let tabelaRecompensasAberta = false;
+let origemSelecaoNiveis = "menu";
+let tempoPausadoNaSelecao = 0;
 
 // Upgrades da Loja
 let upgradeLargo = 0;       // Aumenta o raio do jato
@@ -117,7 +119,7 @@ function executaJogo() {
 
   // Tolerância aumentada pelos upgrades
   let tolMin = max(0.05, faixaIdealMin - upgradeTolerancia * 0.02);
-  let tolMax = faixaIdealMax + upgradeTolerancia * 0.03;
+  let tolMax = min(1, faixaIdealMax + upgradeTolerancia * 0.03);
 
   let raioJatoBase = map(vol, limiteMinimo, 1, 30, 90);
   let raioJato = raioJatoBase + (upgradeLargo * 12); // Upgrade de largura
@@ -148,10 +150,10 @@ function executaJogo() {
     saudeRecife = max(0, saudeRecife - 4.5 * deltaTime / 1000);
   }
 
-  limpador.desenha(tolMin, tolMax);
+  limpador.desenha(tolMin, tolMax, raioJato);
 
   desenhaHUD();
-  desenhaMedidorMicrofone(vol);
+  desenhaMedidorMicrofone(vol, tolMin, tolMax);
   if (pressaoExcessiva && !tabelaRecompensasAberta) {
     desenhaAvisoPressaoExcessiva();
   }
@@ -340,6 +342,7 @@ function mousePressed() {
     if (nivelMaximoDesbloqueado > 1 && 
         mouseX > width / 2 + 10 && mouseX < width / 2 + 180 && 
         mouseY > 440 && mouseY < 480) {
+      origemSelecaoNiveis = "menu";
       estado = "selecaoNiveis";
     }
 
@@ -358,8 +361,17 @@ function mousePressed() {
         }
       }
     }
-    // Botão "← Voltar ao Menu"
-    if (mouseX > width / 2 - 100 && mouseX < width / 2 + 100 && mouseY > 460 && mouseY < 505) {
+    if (origemSelecaoNiveis === "jogo") {
+      if (mouseX > 170 && mouseX < 390 && mouseY > 460 && mouseY < 510) {
+        cronometroJogo += millis() - tempoPausadoNaSelecao;
+        tempoPausadoNaSelecao = 0;
+        estado = "execucao";
+      } else if (mouseX > 410 && mouseX < 630 && mouseY > 460 && mouseY < 510) {
+        tempoPausadoNaSelecao = 0;
+        estado = "inicio";
+      }
+    } else if (mouseX > width / 2 - 100 && mouseX < width / 2 + 100 &&
+               mouseY > 460 && mouseY < 505) {
       estado = "inicio";
     }
 
@@ -381,7 +393,8 @@ function mousePressed() {
 
     // Clique no botão "🗺 Níveis" do HUD (Voltar à seleção sem perder moedas/upgrades)
     if (mouseX > 440 && mouseX < 520 && mouseY > 10 && mouseY < 40) {
-      percentagemLimpa = 0.0; // Reinicia a contagem de limpeza do nível atual
+      origemSelecaoNiveis = "jogo";
+      tempoPausadoNaSelecao = millis();
       estado = "selecaoNiveis";
     }
     if (mouseX > 525 && mouseX < 675 && mouseY > 10 && mouseY < 40) {
@@ -396,12 +409,13 @@ function mousePressed() {
     }
     // Botão "🗺 Escolher Nível"
     if (mouseX > width / 2 + 10 && mouseX < width / 2 + 210 && mouseY > 410 && mouseY < 460) {
+      origemSelecaoNiveis = "menu";
       estado = "selecaoNiveis";
     }
 
   } else if (estado === "loja") {
     // Upgrade 1: Jato Mais Largo
-    if (mouseX > width / 2 - 240 && mouseX < width / 2 - 20 && mouseY > 365 && mouseY < 405) {
+    if (mouseX > width / 2 - 240 && mouseX < width / 2 - 20 && mouseY > 370 && mouseY < 410) {
       let preco = precosUpgradeLargo[upgradeLargo];
       if (upgradeLargo < precosUpgradeLargo.length && moedas >= preco) {
         moedas -= preco;
@@ -409,7 +423,7 @@ function mousePressed() {
       }
     }
     // Upgrade 2: Tolerância de Pressão
-    if (mouseX > width / 2 + 20 && mouseX < width / 2 + 240 && mouseY > 365 && mouseY < 405) {
+    if (mouseX > width / 2 + 20 && mouseX < width / 2 + 240 && mouseY > 370 && mouseY < 410) {
       let preco = precosUpgradeTolerancia[upgradeTolerancia];
       if (upgradeTolerancia < precosUpgradeTolerancia.length && moedas >= preco) {
         moedas -= preco;
@@ -438,6 +452,7 @@ function mousePressed() {
       iniciaNivel(nivelAtual);
     }
     if (mouseX > width / 2 - 130 && mouseX < width / 2 + 130 && mouseY > 430 && mouseY < 480) {
+      origemSelecaoNiveis = "menu";
       estado = "selecaoNiveis";
     }
 

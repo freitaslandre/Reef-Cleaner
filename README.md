@@ -22,7 +22,8 @@ O jogador restaura um recife de coral degradado e branqueado, removendo algas, s
 - Cada nível começa com 100% de saúde. Se a saúde terminar abaixo de 50%, não são atribuídas moedas nesse nível.
 - Com saúde igual ou superior a 50%, a recompensa é 10, 15 ou 30 moedas por nível atual, respetivamente, para 75–89%, 90–99% ou 100% de limpeza.
 - As moedas servem para melhorar a ferramenta na loja: Jato Mais Largo e Tolerância de Pressão têm cinco níveis cada.
-- A saúde perde 4,5 pontos por segundo durante a sobrepressão. A limpeza ideal usa taxa base 0,07; a resistência por nível é 0,8, 1,2, 1,6, 2,0 e 2,4, do nível 1 ao 5.
+- A saúde perde 4,5 pontos por segundo durante a sobrepressão. A limpeza ideal usa taxa base 0,075; os fatores de resistência são 0,8, 1,2, 1,6, 1,85 e 2,15, do nível 1 ao 5.
+- O jato visual e o medidor de pressão refletem os upgrades. A seleção de níveis, quando aberta durante uma partida, permite retomá-la com o tempo e o progresso preservados ou regressar ao menu.
 - **Objetivo final:** completar o nível 5 com 100% de limpeza.
 
 ## Funcionalidades planeadas

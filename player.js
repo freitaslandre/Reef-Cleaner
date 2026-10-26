@@ -10,7 +10,7 @@ class Limpador {
     this.intensidadeJato = volumeVal;
   }
 
-  desenha(tolMin = faixaIdealMin, tolMax = faixaIdealMax) {
+  desenha(tolMin = faixaIdealMin, tolMax = faixaIdealMax, diametroJato) {
     let x = mouseX;
     let y = mouseY;
 
@@ -18,7 +18,9 @@ class Limpador {
 
     // 1. Círculo do Jato de Água exato sobre a posição do rato (mouseX, mouseY)
     if (ativa) {
-      let tamanhoJato = map(this.intensidadeJato, limiteMinimo, 1, 40, 110);
+      let tamanhoJato = diametroJato === undefined
+        ? map(this.intensidadeJato, limiteMinimo, 1, 30, 90) + upgradeLargo * 12
+        : diametroJato;
 
       if (this.intensidadeJato >= tolMin && this.intensidadeJato <= tolMax) {
         fill(100, 220, 255, 140); // Pressão Ideal Suave
