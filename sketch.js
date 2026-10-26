@@ -25,14 +25,18 @@ let tempoRestante = 60;
 let tempoLimiteNivel = 60;
 let percentagemLimpa = 0.0;
 let saudeRecife = 100;
+let moedasGanhasNaPartida = 0;
 let cronometroJogo = 0;
 let tempoPausadoNaLoja = 0;
 let nivelMaximoDesbloqueado = 1; // Controla o progresso máximo já atingido
+let tabelaRecompensasAberta = false;
 
 // Upgrades da Loja
 let upgradeLargo = 0;       // Aumenta o raio do jato
 let upgradeTolerancia = 0;  // Alarga a faixa verde ideal
 let estadoAnteriorLoja = "execucao"; // Guarda se veio de "execucao" ou "fimNivel"
+const precosUpgradeLargo = [20, 45, 80, 130, 200];
+const precosUpgradeTolerancia = [25, 55, 95, 150, 220];
 
 // Objetos e Listas
 let limpador;
@@ -74,6 +78,9 @@ function iniciaNivel(numNivel) {
   tempoLimiteNivel = max(40, 65 - nivelAtual * 5); // Menos tempo em níveis avançados
   tempoRestante = tempoLimiteNivel;
   percentagemLimpa = 0.0;
+  saudeRecife = 100;
+  moedasGanhasNaPartida = 0;
+  tabelaRecompensasAberta = false;
 
   // Aumenta a quantidade e o tamanho inicial das manchas de sujidade
   listaSujidade = [];
@@ -94,8 +101,12 @@ function executaJogo() {
   let vol = mic.getLevel();
 
   // Gestão do Tempo
-  let decorrido = (millis() - cronometroJogo) / 1000;
-  tempoRestante = max(0, tempoLimiteNivel - decorrido);
+  if (tabelaRecompensasAberta) {
+    cronometroJogo += deltaTime;
+  } else {
+    let decorrido = (millis() - cronometroJogo) / 1000;
+    tempoRestante = max(0, tempoLimiteNivel - decorrido);
+  }
 
   limpador.atualiza(vol);
 
@@ -109,11 +120,12 @@ function executaJogo() {
   let raioJatoBase = map(vol, limiteMinimo, 1, 30, 90);
   let raioJato = raioJatoBase + (upgradeLargo * 12); // Upgrade de largura
   let dentroDaZonaIdeal = (vol >= tolMin && vol <= tolMax);
+  let pressaoExcessiva = vol >= limiteMinimo && vol > tolMax;
 
   let sujidadeRestante = 0;
 
   for (let m of listaSujidade) {
-    if (vol >= limiteMinimo) {
+    if (!tabelaRecompensasAberta && vol >= limiteMinimo && !pressaoExcessiva) {
       // Passa o nivelAtual para aumentar a resistência da sujidade nos níveis avançados
       m.limpar(mouseX, mouseY, raioJato, dentroDaZonaIdeal, nivelAtual);
     }
@@ -130,24 +142,43 @@ function executaJogo() {
     percentagemLimpa = constrain((limpo / totalSujidadeInicial) * 100, 0, 100);
   }
 
-  limpador.desenha();
+  if (!tabelaRecompensasAberta && pressaoExcessiva) {
+    saudeRecife = max(0, saudeRecife - 12 * deltaTime / 1000);
+  }
+
+  limpador.desenha(tolMin, tolMax);
 
   desenhaHUD();
   desenhaMedidorMicrofone(vol);
+  if (pressaoExcessiva && !tabelaRecompensasAberta) {
+    desenhaAvisoPressaoExcessiva();
+  }
+  if (tabelaRecompensasAberta) {
+    desenhaModalRecompensas();
+  }
 
   // Verificação de Fim de Nível (Exige 100% para Vitória)
-  if (percentagemLimpa >= 100) {
+  if (!tabelaRecompensasAberta && percentagemLimpa >= 100) {
     concluiNivel(true);
-  } else if (tempoRestante <= 0) {
+  } else if (!tabelaRecompensasAberta && tempoRestante <= 0) {
     concluiNivel(false); // Tempo esgotado sem atingir 100% = Derrota
   }
 }
 
 function concluiNivel(sucesso) {
-  if (sucesso) {
-    let moedasGanha = floor((percentagemLimpa / 10) * nivelAtual);
-    moedas += moedasGanha;
+  moedasGanhasNaPartida = 0;
+  if (saudeRecife >= 50) {
+    if (percentagemLimpa >= 100) {
+      moedasGanhasNaPartida = 30 * nivelAtual;
+    } else if (percentagemLimpa >= 90) {
+      moedasGanhasNaPartida = 15 * nivelAtual;
+    } else if (percentagemLimpa >= 75) {
+      moedasGanhasNaPartida = 10 * nivelAtual;
+    }
+  }
+  moedas += moedasGanhasNaPartida;
 
+  if (sucesso) {
     // Se completou o nível atual a 100%, desbloqueia o nível seguinte
     if (nivelAtual < totalNiveis) {
       if (nivelAtual + 1 > nivelMaximoDesbloqueado) {
@@ -172,6 +203,9 @@ function resetaJogoCompleto() {
   upgradeLargo = 0;
   upgradeTolerancia = 0;
   percentagemLimpa = 0.0;
+  saudeRecife = 100;
+  moedasGanhasNaPartida = 0;
+  tabelaRecompensasAberta = false;
   tempoLimiteNivel = 60;
   tempoRestante = 60;
 }
@@ -267,6 +301,14 @@ function mousePressed() {
     }
 
   } else if (estado === "execucao") {
+    if (tabelaRecompensasAberta) {
+      if (mouseX > width / 2 + 150 && mouseX < width / 2 + 190 &&
+          mouseY > height / 2 - 150 && mouseY < height / 2 - 110) {
+        tabelaRecompensasAberta = false;
+      }
+      return;
+    }
+
     // Clique no botão "🛒 Loja" do HUD
     if (mouseX > 420 && mouseX < 500 && mouseY > 10 && mouseY < 40) {
       tempoPausadoNaLoja = millis();
@@ -275,39 +317,44 @@ function mousePressed() {
     }
 
     // Clique no botão "🗺 Níveis" do HUD (Voltar à seleção sem perder moedas/upgrades)
-    if (mouseX > 510 && mouseX < 600 && mouseY > 10 && mouseY < 40) {
+    if (mouseX > 505 && mouseX < 585 && mouseY > 10 && mouseY < 40) {
       percentagemLimpa = 0.0; // Reinicia a contagem de limpeza do nível atual
       estado = "selecaoNiveis";
+    }
+    if (mouseX > 590 && mouseX < 710 && mouseY > 10 && mouseY < 40) {
+      tabelaRecompensasAberta = true;
     }
 
   } else if (estado === "fimNivel") {
     // Ir para a Loja a partir do ecrã de resultados
-    if (mouseX > width / 2 - 210 && mouseX < width / 2 - 10 && mouseY > 400 && mouseY < 450) {
+    if (mouseX > width / 2 - 210 && mouseX < width / 2 - 10 && mouseY > 410 && mouseY < 460) {
       estadoAnteriorLoja = "fimNivel";
       estado = "loja";
     }
     // Botão "🗺 Escolher Nível"
-    if (mouseX > width / 2 + 10 && mouseX < width / 2 + 210 && mouseY > 400 && mouseY < 450) {
+    if (mouseX > width / 2 + 10 && mouseX < width / 2 + 210 && mouseY > 410 && mouseY < 460) {
       estado = "selecaoNiveis";
     }
 
   } else if (estado === "loja") {
-    // Upgrade 1: Jato Mais Largo (15 moedas)
-    if (mouseX > width / 2 - 240 && mouseX < width / 2 - 20 && mouseY > 330 && mouseY < 375) {
-      if (moedas >= 15 && upgradeLargo < 3) {
-        moedas -= 15;
+    // Upgrade 1: Jato Mais Largo
+    if (mouseX > width / 2 - 240 && mouseX < width / 2 - 20 && mouseY > 365 && mouseY < 405) {
+      let preco = precosUpgradeLargo[upgradeLargo];
+      if (upgradeLargo < precosUpgradeLargo.length && moedas >= preco) {
+        moedas -= preco;
         upgradeLargo++;
       }
     }
-    // Upgrade 2: Tolerância de Pressão (20 moedas)
-    if (mouseX > width / 2 + 20 && mouseX < width / 2 + 240 && mouseY > 330 && mouseY < 375) {
-      if (moedas >= 20 && upgradeTolerancia < 3) {
-        moedas -= 20;
+    // Upgrade 2: Tolerância de Pressão
+    if (mouseX > width / 2 + 20 && mouseX < width / 2 + 240 && mouseY > 365 && mouseY < 405) {
+      let preco = precosUpgradeTolerancia[upgradeTolerancia];
+      if (upgradeTolerancia < precosUpgradeTolerancia.length && moedas >= preco) {
+        moedas -= preco;
         upgradeTolerancia++;
       }
     }
     // Botão de Saída da Loja
-    if (mouseX > width / 2 - 120 && mouseX < width / 2 + 120 && mouseY > 440 && mouseY < 490) {
+    if (mouseX > width / 2 - 120 && mouseX < width / 2 + 120 && mouseY > 435 && mouseY < 480) {
       if (estadoAnteriorLoja === "execucao") {
         // Regressa à partida em curso e repõe o temporizador
         if (tempoPausadoNaLoja > 0) {
@@ -324,13 +371,16 @@ function mousePressed() {
 
   } else if (estado === "gameOver") {
     // Tentar Novamente no mesmo nível
-    if (mouseX > width / 2 - 130 && mouseX < width / 2 + 130 && mouseY > 380 && mouseY < 430) {
+    if (mouseX > width / 2 - 130 && mouseX < width / 2 + 130 && mouseY > 370 && mouseY < 420) {
       iniciaNivel(nivelAtual);
+    }
+    if (mouseX > width / 2 - 130 && mouseX < width / 2 + 130 && mouseY > 430 && mouseY < 480) {
+      estado = "selecaoNiveis";
     }
 
   } else if (estado === "vitoriaFinal") {
     // Clique no Botão "🏠 Menu Inicial"
-    if (mouseX > width / 2 - 120 && mouseX < width / 2 + 120 && mouseY > 410 && mouseY < 460) {
+    if (mouseX > width / 2 - 120 && mouseX < width / 2 + 120 && mouseY > 425 && mouseY < 475) {
       resetaJogoCompleto();
       estado = "inicio";
     }

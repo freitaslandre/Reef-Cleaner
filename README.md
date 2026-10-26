@@ -17,9 +17,10 @@ O jogador restaura um recife de coral degradado e branqueado, removendo algas, s
 - O jogo tem **5 níveis**. Começa-se no nível 1, com a ferramenta de nível 1 e 0 moedas.
 - Cada nível dura **60 s**.
 - O **rato** move o limpador.
-- O **volume da voz/sopro** (microfone) controla a intensidade do jato, que é mais eficaz quanto mais perto estiver da zona ideal. Fraco demais não limpa e forte demais danifica o coral.
-- No fim de cada nível, o jogador ganha moedas do tesouro (resgatadas do navio naufragado no fundo do mar) com base na % de recife limpa (≥ 75%, ≥ 90% e 100%).
-- As moedas servem para melhorar a ferramenta na loja de upgrades.
+- O **volume da voz/sopro** (microfone) controla a intensidade do jato, que é mais eficaz quanto mais perto estiver da zona ideal. Fraco demais não limpa; sobrepressão interrompe a limpeza e danifica progressivamente o recife.
+- Cada nível começa com 100% de saúde. Se a saúde terminar abaixo de 50%, não são atribuídas moedas nesse nível.
+- Com saúde igual ou superior a 50%, a recompensa é 10, 15 ou 30 moedas por nível atual, respetivamente, para 75–89%, 90–99% ou 100% de limpeza.
+- As moedas servem para melhorar a ferramenta na loja: Jato Mais Largo e Tolerância de Pressão têm cinco níveis cada.
 - **Objetivo final:** completar o nível 5 com 100% de limpeza.
 
 ## Funcionalidades planeadas

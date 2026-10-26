@@ -252,14 +252,8 @@ function processaCalibracao() {
     faixaIdealMin = limiteMinimo + 0.08;
     faixaIdealMax = limiteMinimo + 0.28;
 
-    listaSujidade = geraSujidadeAleatoria(15);
-    totalSujidadeInicial = 0;
-    for (let m of listaSujidade) {
-      totalSujidadeInicial += m.raioInicial;
-    }
-
-    cronometroJogo = millis();
-    estado = "execucao";
+    resetaJogoCompleto();
+    iniciaNivel(1);
   }
 }
 
@@ -298,22 +292,87 @@ function desenhaHUD() {
   text("🛒 Loja", 460, 25);
 
   // ---- BOTÃO 2: 🗺 Níveis ----
-  let emCimaNiveis = mouseX > 510 && mouseX < 600 && mouseY > 10 && mouseY < 40;
+  let emCimaNiveis = mouseX > 505 && mouseX < 585 && mouseY > 10 && mouseY < 40;
   fill(emCimaNiveis ? color(240, 160, 60) : color(200, 120, 30));
   stroke(255);
   strokeWeight(1.5);
-  rect(510, 10, 90, 30, 6);
+  rect(505, 10, 80, 30, 6);
 
   fill(255);
   noStroke();
   textSize(13);
-  text("🗺 Níveis", 555, 25);
+  text("🗺 Níveis", 545, 25);
+
+  // ---- BOTÃO 3: 🎁 Recompensas ----
+  let emCimaRecompensas = mouseX > 590 && mouseX < 710 && mouseY > 10 && mouseY < 40;
+  fill(emCimaRecompensas ? color(190, 120, 230) : color(130, 75, 180));
+  stroke(255);
+  strokeWeight(1.5);
+  rect(590, 10, 120, 30, 6);
+
+  fill(255);
+  noStroke();
+  textSize(13);
+  text("🎁 Recompensas", 650, 25);
 
   // Saúde do Recife
-  textAlign(RIGHT, CENTER);
+  textAlign(LEFT, CENTER);
+  fill(saudeRecife < 50 ? color(255, 85, 85) : color(255));
+  textSize(14);
+  text(`Saúde: ${saudeRecife.toFixed(0)}%`, 720, 25);
+}
+
+function desenhaAvisoPressaoExcessiva() {
+  let pisca = frameCount % 30 < 15;
+  rectMode(CENTER);
+  noStroke();
+  fill(70, 0, 0, pisca ? 225 : 190);
+  rect(width / 2, 76, 500, 36, 8);
+  fill(255, pisca ? 70 : 120, 90);
+  textAlign(CENTER, CENTER);
+  textSize(18);
+  text("⚠️ PRESSÃO EXCESSIVA! A DANIFICAR CORAIS!", width / 2, 76);
+}
+
+function desenhaModalRecompensas() {
+  rectMode(CORNER);
+  noStroke();
+  fill(0, 0, 0, 170);
+  rect(0, 0, width, height);
+
+  rectMode(CENTER);
+  fill(10, 35, 60, 245);
+  stroke(240, 200, 80);
+  strokeWeight(2);
+  rect(width / 2, height / 2, 500, 320, 16);
+
+  noStroke();
+  textAlign(CENTER, CENTER);
+  fill(255, 220, 80);
+  textSize(28);
+  text("TABELA DE RECOMPENSAS", width / 2, height / 2 - 115);
+
   fill(255);
-  textSize(15);
-  text(`Saúde Recife: ${(100 - percentagemLimpa).toFixed(0)}%`, width - 30, 25);
+  textSize(17);
+  text("Moedas recebidas conforme a limpeza do recife:", width / 2, height / 2 - 72);
+  fill(180, 230, 255);
+  textSize(16);
+  text("75% a 89% limpo  →  10 Moedas × Nível Atual", width / 2, height / 2 - 32);
+  text("90% a 99% limpo  →  15 Moedas × Nível Atual", width / 2, height / 2 + 2);
+  text("100% limpo  →  30 Moedas × Nível Atual", width / 2, height / 2 + 36);
+
+  fill(saudeRecife < 50 ? color(255, 100, 100) : color(200, 230, 210));
+  textSize(14);
+  text("Requer saúde do recife igual ou superior a 50%.", width / 2, height / 2 + 74);
+
+  rectMode(CORNER);
+  fill(180, 70, 70);
+  stroke(255);
+  rect(width / 2 + 150, height / 2 - 150, 40, 40, 8);
+  noStroke();
+  fill(255);
+  textSize(20);
+  text("×", width / 2 + 170, height / 2 - 130);
 }
 
 // Medidor Vertical do Microfone
@@ -368,24 +427,41 @@ function desenhaFimNivel() {
   stroke(80, 200, 240, 200);
   strokeWeight(2);
   rectMode(CENTER);
-  rect(width / 2, height / 2, 540, 320, 15);
+  rect(width / 2, height / 2, 560, 390, 15);
 
   noStroke();
   fill(255, 220, 80);
   textAlign(CENTER, CENTER);
-  textSize(36);
-  text(`NÍVEL ${nivelAtual} CONCLUÍDO!`, width / 2, height / 2 - 110);
+  textSize(32);
+  text(`NÍVEL ${nivelAtual} CONCLUÍDO!`, width / 2, 135);
 
   fill(255);
   textSize(20);
-  text(`Recife Limpo: ${percentagemLimpa.toFixed(1)}%`, width / 2, height / 2 - 50);
+  text(`Recife Limpo: ${percentagemLimpa.toFixed(1)}%`, width / 2, 180);
 
-  // Tesouro Ganho
-  let ganho = floor((percentagemLimpa / 10) * nivelAtual);
-  drawGoldCoin(width / 2 - 80, height / 2, 14);
+  fill(saudeRecife < 50 ? color(255, 100, 100) : color(190, 230, 255));
+  textSize(17);
+  text(`Saúde do recife: ${saudeRecife.toFixed(0)}%`, width / 2, 210);
+
+  drawGoldCoin(width / 2 - 95, 245, 14);
   fill(255, 215, 0);
-  textSize(22);
-  text(`+${ganho} Moedas do Tesouro!`, width / 2 + 20, height / 2);
+  textSize(21);
+  text(`Ganhaste ${moedasGanhasNaPartida} moedas nesta partida`, width / 2 + 20, 245);
+
+  if (saudeRecife < 50) {
+    fill(255, 100, 100);
+    textSize(15);
+    text("Sem moedas: o recife ficou com menos de 50% de saúde.", width / 2, 280);
+  } else if (percentagemLimpa < 75) {
+    fill(220, 220, 220);
+    textSize(15);
+    text("Não atingiste 75% de limpeza; não ganhaste moedas.", width / 2, 280);
+  }
+  if (percentagemLimpa < 100) {
+    fill(255, 210, 90);
+    textSize(15);
+    text("ℹ️ Necessário 100% de limpeza para desbloquear o próximo nível!", width / 2, 310);
+  }
 
   // Botões de Ação
   rectMode(CORNER);
@@ -394,32 +470,21 @@ function desenhaFimNivel() {
   fill(40, 120, 180);
   stroke(255);
   strokeWeight(2);
-  rect(width / 2 - 210, 400, 200, 50, 10);
+  rect(width / 2 - 210, 410, 200, 50, 10);
   fill(255);
   noStroke();
   textSize(18);
-  text("Loja de Upgrades", width / 2 - 110, 425);
+  text("Loja de Upgrades", width / 2 - 110, 435);
 
-  // Botão Próximo Nível
-  fill(50, 200, 120);
+  // Botão de seleção disponível em todos os resultados
+  fill(50, 150, 110);
   stroke(255);
   strokeWeight(2);
-  rect(width / 2 + 10, 400, 200, 50, 10);
+  rect(width / 2 + 10, 410, 200, 50, 10);
   fill(255);
   noStroke();
   textSize(18);
-  text(nivelAtual < totalNiveis ? "Próximo Nível" : "Menu Inicial", width / 2 + 110, 425);
-
-  // Botão 2: Selecionar Nível / Continuar
-  let emCimaNiveis = mouseX > width / 2 + 10 && mouseX < width / 2 + 210 && mouseY > 400 && mouseY < 450;
-  fill(emCimaNiveis ? color(60, 230, 150) : color(40, 180, 110));
-  stroke(255);
-  strokeWeight(2);
-  rect(width / 2 + 10, 400, 200, 50, 10);
-  fill(255);
-  noStroke();
-  textSize(16);
-  text("🗺 Escolher Nível", width / 2 + 110, 425);
+  text("🗺 Escolher Nível", width / 2 + 110, 435);
 }
 
 // ECRÃ DA LOJA DE UPGRADES
@@ -430,74 +495,84 @@ function desenhaLoja() {
   stroke(240, 190, 50, 220);
   strokeWeight(2);
   rectMode(CENTER);
-  rect(width / 2, height / 2, 560, 360, 15);
+  rect(width / 2, height / 2, 560, 390, 15);
 
   textAlign(CENTER, CENTER);
   fill(255, 220, 80);
   textSize(32);
-  text("LOJA DE MELHORIAS", width / 2, height / 2 - 140);
+  text("LOJA DE MELHORIAS", width / 2, 125);
 
   // Saldo Atual
-  drawGoldCoin(width / 2 - 60, height / 2 - 95, 12);
+  drawGoldCoin(width / 2 - 60, 168, 12);
   fill(255);
   textSize(18);
-  text(`Seu Tesouro: ${moedas} moedas`, width / 2 + 30, height / 2 - 95);
+  text(`Seu Tesouro: ${moedas} moedas`, width / 2 + 30, 168);
 
   // Item 1: Jato Mais Largo
   fill(20, 60, 95);
-  rect(width / 2 - 130, height / 2, 220, 130, 10);
+  rect(width / 2 - 130, 285, 220, 150, 10);
   fill(255);
   textSize(16);
-  text("Jato Ampliado", width / 2 - 130, height / 2 - 40);
+  text("Jato Mais Largo", width / 2 - 130, 232);
   textSize(12);
   fill(180, 220, 255);
-  text(`Nível: ${upgradeLargo}/3`, width / 2 - 130, height / 2 - 15);
-  text("Aumenta o raio de alcance", width / 2 - 130, height / 2 + 5);
+  text(`Nível: ${upgradeLargo}/5`, width / 2 - 130, 255);
+  for (let i = 0; i < 5; i++) {
+    fill(i < upgradeLargo ? color(255, 210, 60) : color(70, 90, 110));
+    rectMode(CORNER);
+    rect(width / 2 - 180 + i * 20, 270, 15, 8, 3);
+  }
+  text("Aumenta o raio de alcance", width / 2 - 130, 295);
 
   // Botão Comprar Item 1
   rectMode(CORNER);
-  fill(moedas >= 15 && upgradeLargo < 3 ? color(50, 200, 120) : color(80, 90, 100));
+  fill(upgradeLargo < 5 && moedas >= precosUpgradeLargo[upgradeLargo] ? color(50, 200, 120) : color(80, 90, 100));
   stroke(255);
-  rect(width / 2 - 240, 330, 220, 45, 8);
+  rect(width / 2 - 240, 365, 220, 40, 8);
   fill(255);
   noStroke();
   textSize(15);
-  text(upgradeLargo >= 3 ? "MÁXIMO" : "Comprar (15 M)", width / 2 - 130, 352);
+  text(upgradeLargo >= 5 ? "MÁXIMO" : `Próximo nível: ${precosUpgradeLargo[upgradeLargo]} M`, width / 2 - 130, 385);
 
   // Item 2: Tolerância de Pressão
   rectMode(CENTER);
   fill(20, 60, 95);
-  rect(width / 2 + 130, height / 2, 220, 130, 10);
+  rect(width / 2 + 130, 285, 220, 150, 10);
   fill(255);
   textSize(16);
-  text("Bocal de Precisão", width / 2 + 130, height / 2 - 40);
+  text("Tolerância de Pressão", width / 2 + 130, 232);
   textSize(12);
   fill(180, 220, 255);
-  text(`Nível: ${upgradeTolerancia}/3`, width / 2 + 130, height / 2 - 15);
-  text("Facilita manter a pressão", width / 2 + 130, height / 2 + 5);
+  text(`Nível: ${upgradeTolerancia}/5`, width / 2 + 130, 255);
+  for (let i = 0; i < 5; i++) {
+    fill(i < upgradeTolerancia ? color(255, 210, 60) : color(70, 90, 110));
+    rectMode(CORNER);
+    rect(width / 2 + 80 + i * 20, 270, 15, 8, 3);
+  }
+  text("Alarga a faixa de pressão ideal", width / 2 + 130, 295);
 
   // Botão Comprar Item 2
   rectMode(CORNER);
-  fill(moedas >= 20 && upgradeTolerancia < 3 ? color(50, 200, 120) : color(80, 90, 100));
+  fill(upgradeTolerancia < 5 && moedas >= precosUpgradeTolerancia[upgradeTolerancia] ? color(50, 200, 120) : color(80, 90, 100));
   stroke(255);
-  rect(width / 2 + 20, 330, 220, 45, 8);
+  rect(width / 2 + 20, 365, 220, 40, 8);
   fill(255);
   noStroke();
   textSize(15);
-  text(upgradeTolerancia >= 3 ? "MÁXIMO" : "Comprar (20 M)", width / 2 + 130, 352);
+  text(upgradeTolerancia >= 5 ? "MÁXIMO" : `Próximo nível: ${precosUpgradeTolerancia[upgradeTolerancia]} M`, width / 2 + 130, 385);
 
   // Botão Voltar (Ajusta o texto dinamicamente consoante a origem)
   fill(40, 140, 200);
   stroke(255);
-  rect(width / 2 - 120, 440, 240, 50, 10);
+  rect(width / 2 - 120, 435, 240, 45, 10);
   fill(255);
   noStroke();
   textSize(18);
   
   if (typeof estadoAnteriorLoja !== "undefined" && estadoAnteriorLoja === "fimNivel") {
-    text("Voltar aos Resultados", width / 2, 465);
+    text("Voltar aos Resultados", width / 2, 458);
   } else {
-    text("Voltar ao Jogo", width / 2, 465);
+    text("Voltar ao Jogo", width / 2, 458);
   }
 }
 
@@ -509,30 +584,53 @@ function desenhaGameOver() {
   stroke(255, 80, 80, 220);
   strokeWeight(2);
   rectMode(CENTER);
-  rect(width / 2, height / 2, 500, 260, 15);
+  rect(width / 2, height / 2, 580, 380, 15);
 
   textAlign(CENTER, CENTER);
   fill(255, 90, 90);
-  textSize(36);
-  text("TEMPO ESGOTADO!", width / 2, height / 2 - 70);
+  textSize(34);
+  text("TEMPO ESGOTADO!", width / 2, 165);
 
   fill(255);
   textSize(18);
-  text(`Apenas ${percentagemLimpa.toFixed(1)}% do recife foi limpo.`, width / 2, height / 2 - 15);
+  text(`Apenas ${percentagemLimpa.toFixed(1)}% do recife foi limpo.`, width / 2, 215);
+  fill(saudeRecife < 50 ? color(255, 100, 100) : color(190, 230, 255));
+  textSize(16);
+  text(`Saúde do recife: ${saudeRecife.toFixed(0)}%`, width / 2, 248);
+  drawGoldCoin(width / 2 - 105, 280, 12);
+  fill(255, 215, 0);
+  textSize(18);
+  text(`Ganhaste ${moedasGanhasNaPartida} moedas nesta partida`, width / 2 + 15, 280);
+  if (saudeRecife < 50) {
+    fill(255, 100, 100);
+    textSize(14);
+    text("Sem moedas: o recife ficou com menos de 50% de saúde.", width / 2, 310);
+  } else if (percentagemLimpa < 75) {
+    fill(220);
+    textSize(14);
+    text("Não atingiste 75% de limpeza; não ganhaste moedas.", width / 2, 310);
+  }
   textSize(14);
-  fill(200, 220, 245);
-  text("Necessita de pelo menos 70% para avançar de nível.", width / 2, height / 2 + 15);
+  fill(255, 210, 90);
+  text("ℹ️ Necessário 100% de limpeza para desbloquear o próximo nível!", width / 2, 337);
 
   rectMode(CORNER);
   fill(220, 70, 70);
   stroke(255);
   strokeWeight(2);
-  rect(width / 2 - 130, 380, 260, 50, 10);
+  rect(width / 2 - 130, 370, 260, 50, 10);
 
   fill(255);
   noStroke();
   textSize(18);
-  text("Tentar Novamente", width / 2, 405);
+  text("Tentar Novamente", width / 2, 395);
+
+  fill(40, 130, 180);
+  stroke(255);
+  rect(width / 2 - 130, 430, 260, 50, 10);
+  fill(255);
+  noStroke();
+  text("🗺 Escolher Nível", width / 2, 455);
 }
 
 // ECRÃ DE VITÓRIA FINAL (PARABÉNS - JOGO CONCLUÍDO)
@@ -543,7 +641,7 @@ function desenhaVitoriaFinal() {
   stroke(255, 215, 0, 220);
   strokeWeight(3);
   rectMode(CENTER);
-  rect(width / 2, height / 2, 580, 340, 15);
+  rect(width / 2, height / 2, 580, 380, 15);
 
   textAlign(CENTER, CENTER);
   fill(255, 220, 80);
@@ -558,25 +656,38 @@ function desenhaVitoriaFinal() {
   fill(180, 230, 255);
   text("O recife de corais está totalmente limpo e restaurado.", width / 2, height / 2 - 15);
 
+  fill(255, 215, 0);
+  textSize(17);
+  text(`Ganhaste ${moedasGanhasNaPartida} moedas nesta partida`, width / 2, height / 2 + 10);
+
   // Exibe o Tesouro Total Acumulado
-  drawGoldCoin(width / 2 - 80, height / 2 + 30, 14);
+  drawGoldCoin(width / 2 - 80, height / 2 + 45, 14);
   fill(255, 215, 0);
   textSize(22);
-  text(`Tesouro Total: ${moedas} Moedas`, width / 2 + 20, height / 2 + 30);
+  text(`Tesouro Total: ${moedas} Moedas`, width / 2 + 20, height / 2 + 45);
+
+  fill(saudeRecife < 50 ? color(255, 100, 100) : color(190, 230, 255));
+  textSize(15);
+  text(`Saúde do recife: ${saudeRecife.toFixed(0)}%`, width / 2, height / 2 + 72);
+  if (saudeRecife < 50) {
+    fill(255, 100, 100);
+    textSize(14);
+    text("Sem moedas neste nível: o recife ficou com menos de 50% de saúde.", width / 2, height / 2 + 94);
+  }
 
   // Botão Voltar ao Menu Inicial
   rectMode(CORNER);
-  let emCimaBtn = mouseX > width / 2 - 120 && mouseX < width / 2 + 120 && mouseY > 410 && mouseY < 460;
+  let emCimaBtn = mouseX > width / 2 - 120 && mouseX < width / 2 + 120 && mouseY > 425 && mouseY < 475;
   
   fill(emCimaBtn ? color(60, 230, 150) : color(40, 180, 110));
   stroke(255);
   strokeWeight(2);
-  rect(width / 2 - 120, 410, 240, 50, 10);
+  rect(width / 2 - 120, 425, 240, 50, 10);
 
   fill(255);
   noStroke();
   textSize(18);
-  text("🏠 Menu Inicial", width / 2, 435);
+  text("🏠 Menu Inicial", width / 2, 450);
 }
 
 // ECRÃ DE SELEÇÃO DE NÍVEIS

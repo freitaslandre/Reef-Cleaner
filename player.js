@@ -10,7 +10,7 @@ class Limpador {
     this.intensidadeJato = volumeVal;
   }
 
-  desenha() {
+  desenha(tolMin = faixaIdealMin, tolMax = faixaIdealMax) {
     let x = mouseX;
     let y = mouseY;
 
@@ -20,7 +20,7 @@ class Limpador {
     if (ativa) {
       let tamanhoJato = map(this.intensidadeJato, limiteMinimo, 1, 40, 110);
 
-      if (this.intensidadeJato >= faixaIdealMin && this.intensidadeJato <= faixaIdealMax) {
+      if (this.intensidadeJato >= tolMin && this.intensidadeJato <= tolMax) {
         fill(100, 220, 255, 140); // Pressão Ideal Suave
       } else {
         fill(255, 90, 90, 160);  // Pressão Excessiva
