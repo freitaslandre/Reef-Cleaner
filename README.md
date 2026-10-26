@@ -18,9 +18,11 @@ O jogador restaura um recife de coral degradado e branqueado, removendo algas, s
 - Cada nível dura **60 s**.
 - O **rato** move o limpador.
 - O **volume da voz/sopro** (microfone) controla a intensidade do jato, que é mais eficaz quanto mais perto estiver da zona ideal. Fraco demais não limpa; sobrepressão interrompe a limpeza e danifica progressivamente o recife.
+- A calibração do ruído ambiente dura 3 segundos e fica guardada no `localStorage` (`calibracaoRuido`); nas visitas seguintes, o botão **Jogar** inicia diretamente o nível 1. É possível recalibrar pelo botão secundário no menu.
 - Cada nível começa com 100% de saúde. Se a saúde terminar abaixo de 50%, não são atribuídas moedas nesse nível.
 - Com saúde igual ou superior a 50%, a recompensa é 10, 15 ou 30 moedas por nível atual, respetivamente, para 75–89%, 90–99% ou 100% de limpeza.
 - As moedas servem para melhorar a ferramenta na loja: Jato Mais Largo e Tolerância de Pressão têm cinco níveis cada.
+- A saúde perde 4,5 pontos por segundo durante a sobrepressão. A resistência da sujidade é ligeiramente reduzida no nível 1 e aumenta progressivamente nos níveis avançados.
 - **Objetivo final:** completar o nível 5 com 100% de limpeza.
 
 ## Funcionalidades planeadas

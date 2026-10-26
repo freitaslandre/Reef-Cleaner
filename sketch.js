@@ -10,6 +10,7 @@ let cronometroCalib = 0;
 let ruidoBase = 0;
 let somaRuido = 0;
 let amostrasRuido = 0;
+let avisoCalibracao = "";
 
 // Limiares de Pressão
 let limiteMinimo = 0.05;
@@ -143,7 +144,7 @@ function executaJogo() {
   }
 
   if (!tabelaRecompensasAberta && pressaoExcessiva) {
-    saudeRecife = max(0, saudeRecife - 12 * deltaTime / 1000);
+    saudeRecife = max(0, saudeRecife - 4.5 * deltaTime / 1000);
   }
 
   limpador.desenha(tolMin, tolMax);
@@ -251,32 +252,87 @@ function processaCalibracao() {
   rect(width / 2 - 200, height / 2 + 72, progresso, 16, 8);
 
   if (tempoDecorrido >= tempoCalibracao) {
-    ruidoBase = somaRuido / amostrasRuido;
-    limiteMinimo = max(0.03, ruidoBase * 1.8);
-    faixaIdealMin = limiteMinimo + 0.08;
-    faixaIdealMax = limiteMinimo + 0.28;
-
-    resetaJogoCompleto(); // Garante moedas=0 e upgrades=0 no arranque
+    guardaCalibracao(somaRuido / amostrasRuido);
     iniciaNivel(1);
   }
 }
 
+function aplicaCalibracao(valor) {
+  ruidoBase = valor;
+  limiteMinimo = max(0.03, ruidoBase * 1.8);
+  faixaIdealMin = limiteMinimo + 0.08;
+  faixaIdealMax = limiteMinimo + 0.28;
+}
+
+function guardaCalibracao(valor) {
+  aplicaCalibracao(valor);
+  try {
+    localStorage.setItem("calibracaoRuido", String(valor));
+    avisoCalibracao = "";
+  } catch (erro) {
+    avisoCalibracao = "Não foi possível guardar a calibração neste browser.";
+    console.error("Falha ao guardar calibracaoRuido no localStorage:", erro);
+  }
+}
+
+function carregaCalibracao() {
+  let valorGuardado;
+  try {
+    valorGuardado = localStorage.getItem("calibracaoRuido");
+  } catch (erro) {
+    avisoCalibracao = "Não foi possível ler a calibração guardada; será feita uma nova.";
+    console.error("Falha ao ler calibracaoRuido do localStorage:", erro);
+    return false;
+  }
+
+  if (valorGuardado === null) return false;
+
+  let valor = Number(valorGuardado);
+  if (!Number.isFinite(valor) || valor < 0 || valor > 1) {
+    avisoCalibracao = "A calibração guardada é inválida; será feita uma nova.";
+    return false;
+  }
+
+  avisoCalibracao = "";
+  aplicaCalibracao(valor);
+  return true;
+}
+
+function iniciaCalibracao() {
+  userStartAudio();
+  mic.start();
+  somaRuido = 0;
+  amostrasRuido = 0;
+  cronometroCalib = millis();
+  estado = "calibrando";
+}
+
 function mousePressed() {
   if (estado === "inicio") {
-    // Botão "Calibrar e Jogar"
+    // Botão "Jogar"
     if (mouseX > width / 2 - 140 && mouseX < width / 2 + 140 &&
         mouseY > 385 && mouseY < 435) {
       userStartAudio();
       mic.start();
-      somaRuido = 0;
-      amostrasRuido = 0;
-      cronometroCalib = millis();
-      estado = "calibrando";
+      if (carregaCalibracao()) {
+        iniciaNivel(1);
+      } else {
+        somaRuido = 0;
+        amostrasRuido = 0;
+        cronometroCalib = millis();
+        estado = "calibrando";
+      }
+    }
+
+    // Botão secundário para recalibrar manualmente
+    if (mouseX > width / 2 - 180 && mouseX < width / 2 - 10 &&
+        mouseY > 440 && mouseY < 480) {
+      iniciaCalibracao();
     }
     // Botão "🗺 Escolher Nível" (só fica ativo se já desbloqueaste mais de 1 nível)
     if (nivelMaximoDesbloqueado > 1 && 
-        mouseX > width / 2 - 140 && mouseX < width / 2 + 140 && 
-        mouseY > 450 && mouseY < 495) {
+        mouseX > width / 2 + 10 && mouseX < width / 2 + 180 && 
+        mouseY > 440 && mouseY < 480) {
       estado = "selecaoNiveis";
     }
 

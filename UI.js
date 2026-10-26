@@ -93,14 +93,16 @@ function desenhaFundoMarinho() {
   drawSunkenShipwreck(0, 0);
   pop();
 
-  // Duna de Areia de Sobreposição para "enterrar" a parte da frente do barco
+  // Duna contínua de areia que cobre suavemente a base do navio.
   fill(180, 155, 105);
   noStroke();
   beginShape();
-  vertex(120, 500);
-  bezierVertex(170, 485, 220, 495, 260, 510);
-  vertex(260, 530);
-  vertex(120, 530);
+  vertex(0, 520);
+  bezierVertex(85, 520, 95, 495, 165, 500);
+  bezierVertex(225, 505, 255, 520, 330, 518);
+  bezierVertex(500, 515, 640, 500, width, 510);
+  vertex(width, height);
+  vertex(0, height);
   endShape(CLOSE);
 
   // 6. PLANÍCIE MARINHA DE PRIMEIRO PLANO (Areia Clara Principal)
@@ -118,7 +120,8 @@ function desenhaFundoMarinho() {
     let c = posicoesCorais[i];
     
     // Verifica se ainda existe alguma mancha de sujidade ativa neste coral
-    let temSujidade = listaSujidade.some(m => m.idCoral === i && !m.limpa);
+    let temSujidade = estado !== "inicio" && estado !== "selecaoNiveis" &&
+      listaSujidade.some(m => m.idCoral === i && !m.limpa);
 
     if (temSujidade) {
       drawCoralBleached(c.x, c.y, c.size, c.type);
@@ -159,7 +162,12 @@ function desenhaInicio() {
   // Cartões de Instruções (Rato vs Voz)
   rectMode(CORNER);
   fill(20, 50, 80, 180);
+  let hoverRato = mouseX > width / 2 - 250 && mouseX < width / 2 - 20 && mouseY > 190 && mouseY < 260;
+  let hoverVoz = mouseX > width / 2 + 20 && mouseX < width / 2 + 250 && mouseY > 190 && mouseY < 260;
+  stroke(255, 215, 0);
+  strokeWeight(hoverRato ? 3 : 2);
   rect(width / 2 - 250, 190, 230, 70, 8);
+  strokeWeight(hoverVoz ? 3 : 2);
   rect(width / 2 + 20, 190, 230, 70, 8);
 
   textAlign(CENTER, CENTER);
@@ -177,83 +185,49 @@ function desenhaInicio() {
   textSize(14);
   text("Recolha moedas do tesouro do navio e complete 100% dos 5 níveis!", width / 2, 335);
 
-  // ---- BOTÃO 1: Calibrar e Jogar ----
+  // ---- BOTÃO 1: Jogar ----
   rectMode(CORNER);
-  let emCimaCalib = mouseX > width / 2 - 140 && mouseX < width / 2 + 140 && mouseY > 380 && mouseY < 425;
-  fill(emCimaCalib ? color(60, 230, 150) : color(40, 180, 110));
+  let emCimaJogar = mouseX > width / 2 - 140 && mouseX < width / 2 + 140 && mouseY > 385 && mouseY < 435;
+  fill(emCimaJogar ? color(60, 230, 150) : color(40, 180, 110));
   stroke(255);
   strokeWeight(2);
-  rect(width / 2 - 140, 380, 280, 45, 10);
+  rect(width / 2 - 140, 385, 280, 50, 10);
 
   fill(255);
   noStroke();
   textSize(17);
-  text("Calibrar e Jogar (3s)", width / 2, 402.5);
+  text("Jogar", width / 2, 410);
 
-  // ---- BOTÃO 2: Escolher Nível (Se tiver mais de 1 nível desbloqueado) ----
+  // Botões secundários: recalibração e seleção de nível.
+  rectMode(CORNER);
+  let emCimaRecalibrar = mouseX > width / 2 - 180 && mouseX < width / 2 - 10 && mouseY > 440 && mouseY < 480;
+  fill(emCimaRecalibrar ? color(70, 190, 240) : color(35, 130, 185));
+  stroke(255);
+  strokeWeight(1.5);
+  rect(width / 2 - 180, 440, 170, 40, 8);
+  fill(255);
+  noStroke();
+  textSize(14);
+  text("⚙️ Recalibrar", width / 2 - 95, 460);
+
   if (typeof nivelMaximoDesbloqueado !== "undefined" && nivelMaximoDesbloqueado > 1) {
-    let emCimaNiveis = mouseX > width / 2 - 140 && mouseX < width / 2 + 140 && mouseY > 435 && mouseY < 480;
+    let emCimaNiveis = mouseX > width / 2 + 10 && mouseX < width / 2 + 180 && mouseY > 440 && mouseY < 480;
     fill(emCimaNiveis ? color(70, 190, 240) : color(35, 130, 185));
     stroke(255);
-    strokeWeight(2);
-    rect(width / 2 - 140, 435, 280, 45, 10);
+    strokeWeight(1.5);
+    rect(width / 2 + 10, 440, 170, 40, 8);
 
     fill(255);
     noStroke();
-    textSize(16);
-    text("🗺 Escolher Nível", width / 2, 457.5);
+    textSize(14);
+    text("🗺 Escolher Nível", width / 2 + 95, 460);
   }
-}
 
-// ECRÃ DE CALIBRAÇÃO
-function processaCalibracao() {
-  let volumeAtual = mic.getLevel();
-  somaRuido += volumeAtual;
-  amostrasRuido++;
-
-  let tempoDecorrido = (millis() - cronometroCalib) / 1000;
-  let restante = max(0, tempoCalibracao - tempoDecorrido);
-
-  desenhaFundoMarinho();
-
-  fill(10, 35, 60, 220);
-  stroke(80, 200, 240, 200);
-  strokeWeight(2);
-  rectMode(CENTER);
-  rect(width / 2, height / 2, 520, 260, 15);
-
-  noStroke();
-  fill(255);
-  textAlign(CENTER, CENTER);
-  textSize(22);
-  text("A calibrar o som ambiente...", width / 2, height / 2 - 70);
-
-  fill(180, 220, 255);
-  textSize(14);
-  text("Mantenha o silêncio normal da divisão durante o contador.", width / 2, height / 2 - 35);
-
-  textSize(54);
-  fill(255, 220, 80);
-  text(restante.toFixed(1) + "s", width / 2, height / 2 + 25);
-
-  let progresso = map(tempoDecorrido, 0, tempoCalibracao, 0, 400);
-  progresso = constrain(progresso, 0, 400);
-
-  fill(20, 60, 90);
-  rect(width / 2, height / 2 + 80, 400, 16, 8);
-
-  fill(50, 220, 130);
-  rectMode(CORNER);
-  rect(width / 2 - 200, height / 2 + 72, progresso, 16, 8);
-
-  if (tempoDecorrido >= tempoCalibracao) {
-    ruidoBase = somaRuido / amostrasRuido;
-    limiteMinimo = max(0.03, ruidoBase * 1.8);
-    faixaIdealMin = limiteMinimo + 0.08;
-    faixaIdealMax = limiteMinimo + 0.28;
-
-    resetaJogoCompleto();
-    iniciaNivel(1);
+  if (avisoCalibracao) {
+    fill(255, 170, 120);
+    textSize(12);
+    textAlign(CENTER, CENTER);
+    text(avisoCalibracao, width / 2, 495);
   }
 }
 
@@ -316,10 +290,10 @@ function desenhaHUD() {
   text("🎁 Recompensas", 650, 25);
 
   // Saúde do Recife
-  textAlign(LEFT, CENTER);
+  textAlign(RIGHT, CENTER);
   fill(saudeRecife < 50 ? color(255, 85, 85) : color(255));
   textSize(14);
-  text(`Saúde: ${saudeRecife.toFixed(0)}%`, 720, 25);
+  text(`Saúde: ${saudeRecife.toFixed(0)}%`, width - 15, 25);
 }
 
 function desenhaAvisoPressaoExcessiva() {
@@ -503,13 +477,17 @@ function desenhaLoja() {
   text("LOJA DE MELHORIAS", width / 2, 125);
 
   // Saldo Atual
-  drawGoldCoin(width / 2 - 60, 168, 12);
+  drawGoldCoin(width / 2 - 92, 168, 12);
   fill(255);
+  textAlign(LEFT, CENTER);
   textSize(18);
-  text(`Seu Tesouro: ${moedas} moedas`, width / 2 + 30, 168);
+  text(`Tesouro: ${moedas} moedas`, width / 2 - 73, 168);
 
   // Item 1: Jato Mais Largo
+  let hoverJato = mouseX > width / 2 - 240 && mouseX < width / 2 - 20 && mouseY > 210 && mouseY < 360;
   fill(20, 60, 95);
+  stroke(hoverJato ? color(255, 220, 80) : color(100, 150, 180));
+  strokeWeight(hoverJato ? 3 : 1.5);
   rect(width / 2 - 130, 285, 220, 150, 10);
   fill(255);
   textSize(16);
@@ -535,8 +513,11 @@ function desenhaLoja() {
   text(upgradeLargo >= 5 ? "MÁXIMO" : `Próximo nível: ${precosUpgradeLargo[upgradeLargo]} M`, width / 2 - 130, 385);
 
   // Item 2: Tolerância de Pressão
+  let hoverTolerancia = mouseX > width / 2 + 20 && mouseX < width / 2 + 240 && mouseY > 210 && mouseY < 360;
   rectMode(CENTER);
   fill(20, 60, 95);
+  stroke(hoverTolerancia ? color(255, 220, 80) : color(100, 150, 180));
+  strokeWeight(hoverTolerancia ? 3 : 1.5);
   rect(width / 2 + 130, 285, 220, 150, 10);
   fill(255);
   textSize(16);
