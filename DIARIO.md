@@ -245,3 +245,38 @@
 - Finalidade: Apoio na transformação geométrica do bocal em P5.js, ajuste da duna de areia sobre a proa do navio e reestruturação da lógica de fluxo da loja.
 - Resultado utilizado: Código de espelhamento do bocal em `Player.js`, coordenadas do baú no convés em `Assets.js` e navegação condicional em `sketch.js`.
 - Decisões minhas: Definir a posição exata da ferramenta em relação ao ponteiro do rato, validar visualmente o enquadramento do navio e ajustar a usabilidade dos botões da loja.
+
+---
+
+## Sessão 9 – 25 de outubro de 2026
+
+**Objetivo:** Implementar o ecrã especial de vitória final para a conclusão do Nível 5, corrigir a reinicialização dos parâmetros no regresso ao Menu Inicial e reajustar a escala visual dos corais e a distribuição da sujidade para elevar a dificuldade do jogo.
+
+**Atividades realizadas:**
+- Criei a função `desenhaVitoriaFinal()` em `UI.js` para apresentar um ecrã de celebração com resumo do tesouro total acumulado e botão de regresso ao Menu Inicial após a conclusão do Nível 5.
+- Atualizei a lógica em `sketch.js` para redirecionar para o ecrã `vitoriaFinal` ao concluir o Nível 5 a 100%.
+- Implementei a função `resetaJogoCompleto()` para repor as moedas, *upgrades* da loja e o temporizador inicial de 60 segundos do Nível 1 ao regressar ao menu.
+- Aumentei a escala de renderização dos corais em `Assets.js` para $2.2\times$, destacando a flora marinha e preenchendo melhor o fundo do mar.
+- Redistribuí os 5 corais ao longo do leito de areia em `UI.js` com novas coordenadas $X$ espaçadas, evitando sobreposições.
+- Aumentei o nível de desafio em `sketch.js`: reestruturei a função `geraSujidadeAleatoria()` para criar manchas de sujidade em maior quantidade e de menor raio (10–16px), dispersas por toda a estrutura vertical dos corais.
+- Documentei e enviei todo o progresso para o repositório GitHub através de *commits* incrementais.
+
+**Problemas:**
+- Ao concluir o jogo e regressar ao Menu Inicial, o novo jogo mantinha o temporizador reduzido (40s) e os *upgrades* adquiridos na sessão anterior.
+- O aumento da escala para $2.2\times$ fez com que os corais ficassem sobrepostos devido às antigas coordenadas $X$.
+- Manchas de sujidade com raios muito grandes facilitavam em demasia a limpeza dos corais.
+
+**Solução:**
+- Garanti a reposição completa do estado global do jogo através de `resetaJogoCompleto()`.
+- Reorganizámos as posições horizontais da lista `posicoesCorais` para alinhar os corais do barco até à borda direita da tela.
+- Reduzimos o raio individual das manchas e aumentámos a sua dispersão vertical (`offsetY`), exigindo maior precisão na passagem do jato de água.
+
+**Decisões:**
+- Manter os corais em grande escala ($2.2\times$) acompanhados por manchas de sujidade mais pequenas e numéricas, exigindo maior tempo e controlo do microfone por parte do jogador.
+- Oferecer uma tela de felicitações dedicada no fim do Nível 5 para proporcionar um sentimento claro de conclusão da experiência pedagógica.
+
+**Utilização de IA:**
+- Ferramenta: Gemini.
+- Finalidade: Apoio na reestruturação matemática das posições dos corais, cálculos de dispersão de manchas e estruturação das funções do ecrã de vitória e reposição de estado.
+- Resultado utilizado: Função `desenhaVitoriaFinal()` em `UI.js`, nova distribuição em `geraSujidadeAleatoria()` e reset de variáveis em `sketch.js`.
+- Decisões minhas: Aprovação dos tamanhos e posições visuais dos corais em jogo, validação do nível de dificuldade das manchas e rejeição do cache automático de áudio em favor do fluxo manual.
