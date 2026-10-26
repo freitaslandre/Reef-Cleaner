@@ -18,10 +18,11 @@ class ManchaSujidade {
     if (d < raioJato / 2) {
       // Valores de limpeza drasticamente reduzidos (muito mais lentos)
       // Fora da zona ideal limpa quase nada (0.015), na zona ideal limpa a ritmo controlado (0.05)
-      let taxaLimpezaBase = dentroDaZonaIdeal ? 0.055 : 0.0165;
+      let taxaLimpezaBase = dentroDaZonaIdeal ? 0.07 : 0.0165;
       
-      // Mantém o nível inicial acessível e aumenta a resistência nos níveis avançados.
-      let fatorResistenciaNivel = nivel === 1 ? 0.9 : 1 + (nivel - 1) * 0.55;
+      let fatoresResistencia = [0.8, 1.2, 1.6, 2.0, 2.4];
+      let indiceNivel = Math.max(0, Math.min(fatoresResistencia.length - 1, nivel - 1));
+      let fatorResistenciaNivel = fatoresResistencia[indiceNivel];
       let reducao = taxaLimpezaBase / fatorResistenciaNivel;
 
       this.raioAtual -= reducao;

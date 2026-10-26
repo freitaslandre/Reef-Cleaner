@@ -170,6 +170,7 @@ function desenhaInicio() {
   strokeWeight(hoverVoz ? 3 : 2);
   rect(width / 2 + 20, 190, 230, 70, 8);
 
+  noStroke();
   textAlign(CENTER, CENTER);
   fill(255, 215, 0);
   textSize(15);
@@ -241,59 +242,59 @@ function desenhaHUD() {
 
   fill(255);
   textAlign(LEFT, CENTER);
-  textSize(16);
-  text(`Nível: ${nivelAtual}`, 30, 25);
-  text(`Tempo: ${ceil(tempoRestante)}s`, 125, 25);
-  text(`Limpo: ${percentagemLimpa.toFixed(1)}%`, 235, 25);
+  textSize(15);
+  text(`Nível: ${nivelAtual}`, 12, 25);
+  text(`Tempo: ${ceil(tempoRestante)}s`, 95, 25);
+  text(`Limpo: ${percentagemLimpa.toFixed(1)}%`, 180, 25);
 
   // Exibe Moedas
-  drawGoldCoin(360, 25, 12);
+  drawGoldCoin(292, 25, 12);
   fill(255, 215, 0);
-  textSize(16);
-  text(`${moedas}`, 380, 25);
+  textSize(15);
+  text(`${moedas}`, 308, 25);
 
   // ---- BOTÃO 1: 🛒 Loja ----
-  let emCimaLoja = mouseX > 420 && mouseX < 500 && mouseY > 10 && mouseY < 40;
+  let emCimaLoja = mouseX > 360 && mouseX < 435 && mouseY > 10 && mouseY < 40;
   fill(emCimaLoja ? color(70, 190, 240) : color(35, 130, 185));
   stroke(255);
   strokeWeight(1.5);
-  rect(420, 10, 80, 30, 6);
+  rect(360, 10, 75, 30, 6);
 
   fill(255);
   noStroke();
   textAlign(CENTER, CENTER);
   textSize(13);
-  text("🛒 Loja", 460, 25);
+  text("🛒 Loja", 397.5, 25);
 
   // ---- BOTÃO 2: 🗺 Níveis ----
-  let emCimaNiveis = mouseX > 505 && mouseX < 585 && mouseY > 10 && mouseY < 40;
+  let emCimaNiveis = mouseX > 440 && mouseX < 520 && mouseY > 10 && mouseY < 40;
   fill(emCimaNiveis ? color(240, 160, 60) : color(200, 120, 30));
   stroke(255);
   strokeWeight(1.5);
-  rect(505, 10, 80, 30, 6);
+  rect(440, 10, 80, 30, 6);
 
   fill(255);
   noStroke();
   textSize(13);
-  text("🗺 Níveis", 545, 25);
+  text("🗺 Níveis", 480, 25);
 
   // ---- BOTÃO 3: 🎁 Recompensas ----
-  let emCimaRecompensas = mouseX > 590 && mouseX < 710 && mouseY > 10 && mouseY < 40;
+  let emCimaRecompensas = mouseX > 525 && mouseX < 675 && mouseY > 10 && mouseY < 40;
   fill(emCimaRecompensas ? color(190, 120, 230) : color(130, 75, 180));
   stroke(255);
   strokeWeight(1.5);
-  rect(590, 10, 120, 30, 6);
+  rect(525, 10, 150, 30, 6);
 
   fill(255);
   noStroke();
   textSize(13);
-  text("🎁 Recompensas", 650, 25);
+  text("🎁 Recompensas", 600, 25);
 
   // Saúde do Recife
   textAlign(RIGHT, CENTER);
   fill(saudeRecife < 50 ? color(255, 85, 85) : color(255));
   textSize(14);
-  text(`Saúde: ${saudeRecife.toFixed(0)}%`, width - 15, 25);
+  text(`Saúde: ${saudeRecife.toFixed(0)}%`, width - 12, 25);
 }
 
 function desenhaAvisoPressaoExcessiva() {
@@ -342,11 +343,11 @@ function desenhaModalRecompensas() {
   rectMode(CORNER);
   fill(180, 70, 70);
   stroke(255);
-  rect(width / 2 + 150, height / 2 - 150, 40, 40, 8);
+  rect(width / 2 + 200, height / 2 - 150, 40, 40, 8);
   noStroke();
   fill(255);
   textSize(20);
-  text("×", width / 2 + 170, height / 2 - 130);
+  text("×", width / 2 + 220, height / 2 - 130);
 }
 
 // Medidor Vertical do Microfone
@@ -417,10 +418,13 @@ function desenhaFimNivel() {
   textSize(17);
   text(`Saúde do recife: ${saudeRecife.toFixed(0)}%`, width / 2, 210);
 
-  drawGoldCoin(width / 2 - 95, 245, 14);
+  drawGoldCoin(width / 2 - 205, 245, 14);
+  noStroke();
   fill(255, 215, 0);
-  textSize(21);
-  text(`Ganhaste ${moedasGanhasNaPartida} moedas nesta partida`, width / 2 + 20, 245);
+  textAlign(LEFT, CENTER);
+  textSize(19);
+  text(`Ganhaste ${moedasGanhasNaPartida} moedas nesta partida`, width / 2 - 184, 245);
+  textAlign(CENTER, CENTER);
 
   if (saudeRecife < 50) {
     fill(255, 100, 100);
@@ -448,6 +452,7 @@ function desenhaFimNivel() {
   fill(255);
   noStroke();
   textSize(18);
+  textAlign(CENTER, CENTER);
   text("Loja de Upgrades", width / 2 - 110, 435);
 
   // Botão de seleção disponível em todos os resultados
@@ -473,74 +478,82 @@ function desenhaLoja() {
 
   textAlign(CENTER, CENTER);
   fill(255, 220, 80);
-  textSize(32);
-  text("LOJA DE MELHORIAS", width / 2, 125);
+  textSize(30);
+  text("LOJA DE MELHORIAS", width / 2, 120);
 
   // Saldo Atual
-  drawGoldCoin(width / 2 - 92, 168, 12);
+  drawGoldCoin(width / 2 - 92, 150, 12);
   fill(255);
   textAlign(LEFT, CENTER);
   textSize(18);
-  text(`Tesouro: ${moedas} moedas`, width / 2 - 73, 168);
+  text(`Tesouro: ${moedas} moedas`, width / 2 - 73, 150);
 
   // Item 1: Jato Mais Largo
-  let hoverJato = mouseX > width / 2 - 240 && mouseX < width / 2 - 20 && mouseY > 210 && mouseY < 360;
+  let hoverJato = mouseX > width / 2 - 240 && mouseX < width / 2 - 20 && mouseY > 195 && mouseY < 420;
   fill(20, 60, 95);
   stroke(hoverJato ? color(255, 220, 80) : color(100, 150, 180));
   strokeWeight(hoverJato ? 3 : 1.5);
-  rect(width / 2 - 130, 285, 220, 150, 10);
+  rect(width / 2 - 130, 305, 220, 220, 10);
   fill(255);
+  noStroke();
+  textAlign(CENTER, CENTER);
   textSize(16);
-  text("Jato Mais Largo", width / 2 - 130, 232);
+  text("Jato Mais Largo", width / 2 - 130, 225);
   textSize(12);
   fill(180, 220, 255);
-  text(`Nível: ${upgradeLargo}/5`, width / 2 - 130, 255);
+  text(`Nível: ${upgradeLargo}/5`, width / 2 - 130, 252);
   for (let i = 0; i < 5; i++) {
     fill(i < upgradeLargo ? color(255, 210, 60) : color(70, 90, 110));
     rectMode(CORNER);
-    rect(width / 2 - 180 + i * 20, 270, 15, 8, 3);
+    rect(width / 2 - 170 + i * 20, 270, 15, 8, 3);
   }
-  text("Aumenta o raio de alcance", width / 2 - 130, 295);
+  fill(180, 220, 255);
+  text("Aumenta o raio de alcance", width / 2 - 130, 300);
 
   // Botão Comprar Item 1
   rectMode(CORNER);
   fill(upgradeLargo < 5 && moedas >= precosUpgradeLargo[upgradeLargo] ? color(50, 200, 120) : color(80, 90, 100));
   stroke(255);
-  rect(width / 2 - 240, 365, 220, 40, 8);
+  rect(width / 2 - 235, 370, 210, 40, 8);
   fill(255);
   noStroke();
   textSize(15);
-  text(upgradeLargo >= 5 ? "MÁXIMO" : `Próximo nível: ${precosUpgradeLargo[upgradeLargo]} M`, width / 2 - 130, 385);
+  textAlign(CENTER, CENTER);
+  text(upgradeLargo >= 5 ? "MÁXIMO" : `Próximo nível: ${precosUpgradeLargo[upgradeLargo]} M`, width / 2 - 130, 390);
 
   // Item 2: Tolerância de Pressão
-  let hoverTolerancia = mouseX > width / 2 + 20 && mouseX < width / 2 + 240 && mouseY > 210 && mouseY < 360;
+  let hoverTolerancia = mouseX > width / 2 + 20 && mouseX < width / 2 + 240 && mouseY > 195 && mouseY < 420;
   rectMode(CENTER);
   fill(20, 60, 95);
   stroke(hoverTolerancia ? color(255, 220, 80) : color(100, 150, 180));
   strokeWeight(hoverTolerancia ? 3 : 1.5);
-  rect(width / 2 + 130, 285, 220, 150, 10);
+  rect(width / 2 + 130, 305, 220, 220, 10);
   fill(255);
+  noStroke();
+  textAlign(CENTER, CENTER);
   textSize(16);
-  text("Tolerância de Pressão", width / 2 + 130, 232);
+  text("Tolerância de Pressão", width / 2 + 130, 225);
   textSize(12);
   fill(180, 220, 255);
-  text(`Nível: ${upgradeTolerancia}/5`, width / 2 + 130, 255);
+  text(`Nível: ${upgradeTolerancia}/5`, width / 2 + 130, 252);
   for (let i = 0; i < 5; i++) {
     fill(i < upgradeTolerancia ? color(255, 210, 60) : color(70, 90, 110));
     rectMode(CORNER);
-    rect(width / 2 + 80 + i * 20, 270, 15, 8, 3);
+    rect(width / 2 + 90 + i * 20, 270, 15, 8, 3);
   }
-  text("Alarga a faixa de pressão ideal", width / 2 + 130, 295);
+  fill(180, 220, 255);
+  text("Alarga a faixa de pressão ideal", width / 2 + 130, 300);
 
   // Botão Comprar Item 2
   rectMode(CORNER);
   fill(upgradeTolerancia < 5 && moedas >= precosUpgradeTolerancia[upgradeTolerancia] ? color(50, 200, 120) : color(80, 90, 100));
   stroke(255);
-  rect(width / 2 + 20, 365, 220, 40, 8);
+  rect(width / 2 + 25, 370, 210, 40, 8);
   fill(255);
   noStroke();
   textSize(15);
-  text(upgradeTolerancia >= 5 ? "MÁXIMO" : `Próximo nível: ${precosUpgradeTolerancia[upgradeTolerancia]} M`, width / 2 + 130, 385);
+  textAlign(CENTER, CENTER);
+  text(upgradeTolerancia >= 5 ? "MÁXIMO" : `Próximo nível: ${precosUpgradeTolerancia[upgradeTolerancia]} M`, width / 2 + 130, 390);
 
   // Botão Voltar (Ajusta o texto dinamicamente consoante a origem)
   fill(40, 140, 200);
@@ -578,10 +591,13 @@ function desenhaGameOver() {
   fill(saudeRecife < 50 ? color(255, 100, 100) : color(190, 230, 255));
   textSize(16);
   text(`Saúde do recife: ${saudeRecife.toFixed(0)}%`, width / 2, 248);
-  drawGoldCoin(width / 2 - 105, 280, 12);
+  drawGoldCoin(width / 2 - 205, 280, 12);
+  noStroke();
   fill(255, 215, 0);
-  textSize(18);
-  text(`Ganhaste ${moedasGanhasNaPartida} moedas nesta partida`, width / 2 + 15, 280);
+  textAlign(LEFT, CENTER);
+  textSize(17);
+  text(`Ganhaste ${moedasGanhasNaPartida} moedas nesta partida`, width / 2 - 184, 280);
+  textAlign(CENTER, CENTER);
   if (saudeRecife < 50) {
     fill(255, 100, 100);
     textSize(14);

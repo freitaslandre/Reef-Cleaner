@@ -11,6 +11,7 @@ let ruidoBase = 0;
 let somaRuido = 0;
 let amostrasRuido = 0;
 let avisoCalibracao = "";
+let origemCalibracao = "jogar";
 
 // Limiares de Pressão
 let limiteMinimo = 0.05;
@@ -253,7 +254,11 @@ function processaCalibracao() {
 
   if (tempoDecorrido >= tempoCalibracao) {
     guardaCalibracao(somaRuido / amostrasRuido);
-    iniciaNivel(1);
+    if (origemCalibracao === "recalibrar") {
+      estado = "inicio";
+    } else {
+      iniciaNivel(1);
+    }
   }
 }
 
@@ -304,6 +309,7 @@ function iniciaCalibracao() {
   somaRuido = 0;
   amostrasRuido = 0;
   cronometroCalib = millis();
+  origemCalibracao = "recalibrar";
   estado = "calibrando";
 }
 
@@ -320,6 +326,7 @@ function mousePressed() {
         somaRuido = 0;
         amostrasRuido = 0;
         cronometroCalib = millis();
+        origemCalibracao = "jogar";
         estado = "calibrando";
       }
     }
@@ -358,7 +365,7 @@ function mousePressed() {
 
   } else if (estado === "execucao") {
     if (tabelaRecompensasAberta) {
-      if (mouseX > width / 2 + 150 && mouseX < width / 2 + 190 &&
+      if (mouseX > width / 2 + 200 && mouseX < width / 2 + 240 &&
           mouseY > height / 2 - 150 && mouseY < height / 2 - 110) {
         tabelaRecompensasAberta = false;
       }
@@ -366,18 +373,18 @@ function mousePressed() {
     }
 
     // Clique no botão "🛒 Loja" do HUD
-    if (mouseX > 420 && mouseX < 500 && mouseY > 10 && mouseY < 40) {
+    if (mouseX > 360 && mouseX < 435 && mouseY > 10 && mouseY < 40) {
       tempoPausadoNaLoja = millis();
       estadoAnteriorLoja = "execucao";
       estado = "loja";
     }
 
     // Clique no botão "🗺 Níveis" do HUD (Voltar à seleção sem perder moedas/upgrades)
-    if (mouseX > 505 && mouseX < 585 && mouseY > 10 && mouseY < 40) {
+    if (mouseX > 440 && mouseX < 520 && mouseY > 10 && mouseY < 40) {
       percentagemLimpa = 0.0; // Reinicia a contagem de limpeza do nível atual
       estado = "selecaoNiveis";
     }
-    if (mouseX > 590 && mouseX < 710 && mouseY > 10 && mouseY < 40) {
+    if (mouseX > 525 && mouseX < 675 && mouseY > 10 && mouseY < 40) {
       tabelaRecompensasAberta = true;
     }
 
