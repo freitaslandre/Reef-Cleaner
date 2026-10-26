@@ -19,18 +19,6 @@
 /* Internal helpers (prefixed with _ to avoid clashing with game code) */
 /* ------------------------------------------------------------------ */
 
-// Vertical linear gradient rectangle using the native canvas context.
-function _vGradientRect(x, y, w, h, c1, c2) {
-  const ctx = drawingContext;
-  const g = ctx.createLinearGradient(0, y, 0, y + h);
-  g.addColorStop(0, c1);
-  g.addColorStop(1, c2);
-  ctx.save();
-  ctx.fillStyle = g;
-  ctx.fillRect(x, y, w, h);
-  ctx.restore();
-}
-
 // Soft radial glow using the native canvas context (does not touch p5 state).
 function _glow(x, y, r, rgbaInner, rgbaOuter) {
   const ctx = drawingContext;

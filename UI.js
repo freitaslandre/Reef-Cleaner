@@ -1,10 +1,11 @@
-// UI.js - Interface, HUD, Medidores, Fundo Marinho e Composicao de Assets
-
+// Guarda os elementos animados usados no cenário marítimo.
 let bolhasFundo = [];
 let peixesFundo = [];
 
+// Cria as bolhas e os peixes decorativos apenas na primeira chamada.
 function inicializaFundoAtivo() {
   if (bolhasFundo.length === 0) {
+    // Distribui bolhas pelo canvas com tamanhos e velocidades variadas.
     for (let i = 0; i < 25; i++) {
       bolhasFundo.push({
         x: random(width),
@@ -16,13 +17,14 @@ function inicializaFundoAtivo() {
   }
 
   if (peixesFundo.length === 0) {
+    // Define a posição, a espécie e a direção inicial de cada peixe.
     peixesFundo.push({ x: 100, y: 150, speed: 1.2, size: 38, species: 1, dir: 1 });
     peixesFundo.push({ x: 700, y: 220, speed: 0.9, size: 42, species: 2, dir: -1 });
     peixesFundo.push({ x: 300, y: 280, speed: 1.4, size: 32, species: 3, dir: 1 });
   }
 }
 
-// Posições fixas dos corais para que a sujidade consiga nascer exatamente sobre eles
+// Define as posições e os tipos de coral usados no cenário e na geração da sujidade.
 const posicoesCorais = [
   { x: 260, y: 520, size: 45, type: 1 }, // Coral Cérebro (perto do barco)
   { x: 375, y: 525, size: 50, type: 2 }, // Coral Ramificado
@@ -31,9 +33,9 @@ const posicoesCorais = [
   { x: 715, y: 525, size: 48, type: 2 }  // Coral Ramificado (direita)
 ];
 
-// Fundo Marinho com Profundidade Aumentada e Navio Enterrado na Diagonal
+// Desenha o fundo, anima os elementos decorativos e apresenta os corais do estado atual.
 function desenhaFundoMarinho() {
-  // 1. Gradiente de Água Turquesa Iluminada
+  // Desenha a transição vertical entre a água iluminada e a zona mais profunda.
   for (let y = 0; y < height; y++) {
     let inter = map(y, 0, height, 0, 1);
     let c = lerpColor(color(40, 180, 220), color(15, 75, 120), inter);
@@ -41,7 +43,7 @@ function desenhaFundoMarinho() {
     line(0, y, width, y);
   }
 
-  // 2. Raios de Sol Subaquáticos
+  // Sobrepõe duas formas translúcidas para representar raios de sol.
   noStroke();
   fill(255, 255, 200, 25);
   beginShape();
@@ -52,9 +54,10 @@ function desenhaFundoMarinho() {
   vertex(450, 0); vertex(580, 0); vertex(720, height); vertex(520, height);
   endShape(CLOSE);
 
-  // 3. Bolhas e Peixes Animados no Espaço Aquático
+  // Inicializa os elementos decorativos antes de os animar.
   inicializaFundoAtivo();
 
+  // Move as bolhas para cima e repõe cada uma quando sai do canvas.
   fill(255, 255, 255, 80);
   noStroke();
   for (let b of bolhasFundo) {
@@ -67,6 +70,7 @@ function desenhaFundoMarinho() {
     }
   }
 
+  // Move cada peixe na sua direção atual e inverte-o ao alcançar os limites.
   for (let p of peixesFundo) {
     p.x += p.speed * p.dir;
     if (p.x > width + 50) p.dir = -1;
@@ -74,7 +78,7 @@ function desenhaFundoMarinho() {
     drawFish(p.x, p.y, p.size, p.dir, p.species);
   }
 
-  // 4. PLANÍCIE / DUNA DE SEGUNDO PLANO (Ao Longe)
+  // Desenha a duna distante atrás do navio.
   fill(180, 155, 105);
   noStroke();
   beginShape();
@@ -84,10 +88,10 @@ function desenhaFundoMarinho() {
   vertex(0, height);
   endShape(CLOSE);
 
-  // 5. NAVIO NAUFRAGADO ENTERRADO PROFUNDAMENTE (Segundo Plano)
+  // Posiciona, inclina e reduz o navio antes de o desenhar.
   push();
-  translate(100, 490);   // Afunda o navio mais para baixo
-  rotate(0.32);          // Maior inclinação diagonal (proa afundada)
+  translate(100, 490);
+  rotate(0.32);
   scale(0.65);
 
   drawSunkenShipwreck(0, 0);
@@ -105,7 +109,7 @@ function desenhaFundoMarinho() {
   vertex(0, height);
   endShape(CLOSE);
 
-  // 6. PLANÍCIE MARINHA DE PRIMEIRO PLANO (Areia Clara Principal)
+  // Desenha a camada de areia clara em primeiro plano.
   fill(225, 200, 135);
   beginShape();
   vertex(0, 520);
@@ -114,12 +118,11 @@ function desenhaFundoMarinho() {
   vertex(0, height);
   endShape(CLOSE);
 
-  // 7. CORAIS NO PRIMEIRO PLANO (Assentes firmemente no leito de areia)
-  // 7. CORAIS NO PRIMEIRO PLANO (Dinâmicos: Branqueados se tiverem sujidade, Vivos se estiverem limpos)
+  // Desenha cada coral branqueado se ainda tiver sujidade ou saudável se estiver limpo.
   for (let i = 0; i < posicoesCorais.length; i++) {
     let c = posicoesCorais[i];
-    
-    // Verifica se ainda existe alguma mancha de sujidade ativa neste coral
+
+    // Ignora a sujidade nos ecrãs de menu para manter os corais saudáveis.
     let temSujidade = estado !== "inicio" && estado !== "selecaoNiveis" &&
       listaSujidade.some(m => m.idCoral === i && !m.limpa);
 
@@ -130,16 +133,16 @@ function desenhaFundoMarinho() {
     }
   }
 
-  // Conchas decorativas na areia
+  // Coloca conchas decorativas sobre a areia.
   drawShell(180, 550, 20);
   drawShell(510, 555, 22);
 }
 
-// ECRÃ INICIAL
+// Desenha o menu, as instruções e os botões para iniciar ou configurar o jogo.
 function desenhaInicio() {
   desenhaFundoMarinho();
 
-  // Título Principal
+  // Apresenta o título do jogo.
   textAlign(CENTER, CENTER);
   fill(255, 230, 110);
   stroke(20, 50, 70);
@@ -147,7 +150,7 @@ function desenhaInicio() {
   textSize(42);
   text("REEF CLEANER", width / 2, 80);
 
-  // Painel Principal de Instruções (Aumentada a altura para 250px)
+  // Desenha o painel que contém as instruções.
   fill(10, 35, 60, 220);
   stroke(80, 200, 240, 180);
   strokeWeight(2);
@@ -159,7 +162,7 @@ function desenhaInicio() {
   textSize(18);
   text("Restaure o ecossistema limpando as algas e sedimentos dos corais!", width / 2, 160);
 
-  // Cartões de Instruções (Rato vs Voz)
+  // Desenha os cartões de instruções e destaca cada cartão sob o cursor.
   rectMode(CORNER);
   fill(20, 50, 80, 180);
   let hoverRato = mouseX > width / 2 - 250 && mouseX < width / 2 - 20 && mouseY > 190 && mouseY < 260;
@@ -186,7 +189,7 @@ function desenhaInicio() {
   textSize(14);
   text("Recolha moedas do tesouro do navio e complete 100% dos 5 níveis!", width / 2, 335);
 
-  // ---- BOTÃO 1: Jogar ----
+  // Desenha o botão que inicia uma partida.
   rectMode(CORNER);
   let emCimaJogar = mouseX > width / 2 - 140 && mouseX < width / 2 + 140 && mouseY > 385 && mouseY < 435;
   fill(emCimaJogar ? color(60, 230, 150) : color(40, 180, 110));
@@ -199,7 +202,7 @@ function desenhaInicio() {
   textSize(17);
   text("Jogar", width / 2, 410);
 
-  // Botões secundários: recalibração e seleção de nível.
+  // Desenha o botão de recalibração e, se houver progresso, o de seleção de nível.
   rectMode(CORNER);
   let emCimaRecalibrar = mouseX > width / 2 - 180 && mouseX < width / 2 - 10 && mouseY > 440 && mouseY < 480;
   fill(emCimaRecalibrar ? color(70, 190, 240) : color(35, 130, 185));
@@ -232,8 +235,7 @@ function desenhaInicio() {
   }
 }
 
-// HUD Superior
-// HUD Superior com Botão de Acesso à Loja
+// Desenha o HUD com o progresso, os recursos e os atalhos da partida.
 function desenhaHUD() {
   rectMode(CORNER);
   fill(10, 35, 60, 200);
@@ -247,13 +249,13 @@ function desenhaHUD() {
   text(`Tempo: ${ceil(tempoRestante)}s`, 95, 25);
   text(`Limpo: ${percentagemLimpa.toFixed(1)}%`, 180, 25);
 
-  // Exibe Moedas
+  // Apresenta o saldo atual com o ícone de moeda.
   drawGoldCoin(292, 25, 12);
   fill(255, 215, 0);
   textSize(15);
   text(`${moedas}`, 308, 25);
 
-  // ---- BOTÃO 1: 🛒 Loja ----
+  // Desenha o botão que abre a loja.
   let emCimaLoja = mouseX > 360 && mouseX < 435 && mouseY > 10 && mouseY < 40;
   fill(emCimaLoja ? color(70, 190, 240) : color(35, 130, 185));
   stroke(255);
@@ -266,7 +268,7 @@ function desenhaHUD() {
   textSize(13);
   text("🛒 Loja", 397.5, 25);
 
-  // ---- BOTÃO 2: 🗺 Níveis ----
+  // Desenha o botão que abre a seleção de níveis.
   let emCimaNiveis = mouseX > 440 && mouseX < 520 && mouseY > 10 && mouseY < 40;
   fill(emCimaNiveis ? color(240, 160, 60) : color(200, 120, 30));
   stroke(255);
@@ -278,7 +280,7 @@ function desenhaHUD() {
   textSize(13);
   text("🗺 Níveis", 480, 25);
 
-  // ---- BOTÃO 3: 🎁 Recompensas ----
+  // Desenha o botão que abre a tabela de recompensas.
   let emCimaRecompensas = mouseX > 525 && mouseX < 675 && mouseY > 10 && mouseY < 40;
   fill(emCimaRecompensas ? color(190, 120, 230) : color(130, 75, 180));
   stroke(255);
@@ -290,13 +292,14 @@ function desenhaHUD() {
   textSize(13);
   text("🎁 Recompensas", 600, 25);
 
-  // Saúde do Recife
+  // Apresenta a saúde do recife e destaca valores abaixo de 50%.
   textAlign(RIGHT, CENTER);
   fill(saudeRecife < 50 ? color(255, 85, 85) : color(255));
   textSize(14);
   text(`Saúde: ${saudeRecife.toFixed(0)}%`, width - 12, 25);
 }
 
+// Mostra um aviso intermitente quando a pressão danifica os corais.
 function desenhaAvisoPressaoExcessiva() {
   let pisca = frameCount % 30 < 15;
   rectMode(CENTER);
@@ -309,6 +312,7 @@ function desenhaAvisoPressaoExcessiva() {
   text("⚠️ PRESSÃO EXCESSIVA! A DANIFICAR CORAIS!", width / 2, 76);
 }
 
+// Desenha o modal de recompensas e o respetivo botão de fecho.
 function desenhaModalRecompensas() {
   rectMode(CORNER);
   noStroke();
@@ -350,7 +354,7 @@ function desenhaModalRecompensas() {
   text("×", width / 2 + 220, height / 2 - 130);
 }
 
-// Medidor Vertical do Microfone
+// Desenha o nível do microfone e a faixa de pressão ideal.
 function desenhaMedidorMicrofone(volAtual, tolMin = faixaIdealMin, tolMax = faixaIdealMax) {
   let x = width - 55;
   let y = 65;
@@ -363,12 +367,14 @@ function desenhaMedidorMicrofone(volAtual, tolMin = faixaIdealMin, tolMax = faix
   rectMode(CORNER);
   rect(x, y, larg, alt, 6);
 
+  // Converte os limites de pressão em coordenadas verticais dentro do medidor.
   let yIdealMin = map(constrain(tolMax, 0, 1), 0, 1, y + alt, y);
   let yIdealMax = map(constrain(tolMin, 0, 1), 0, 1, y + alt, y);
   noStroke();
   fill(50, 230, 120, 160);
   rect(x, yIdealMin, larg, yIdealMax - yIdealMin);
 
+  // Converte o volume atual na altura da barra de entrada.
   let altVolume = map(volAtual, 0, 1, 0, alt);
   altVolume = constrain(altVolume, 0, alt);
 
@@ -394,6 +400,7 @@ function desenhaMedidorMicrofone(volAtual, tolMin = faixaIdealMin, tolMax = faix
   text("Micro", x + larg / 2, y + alt + 8);
 }
 
+// Centraliza em conjunto um ícone de moeda e a frase que o acompanha.
 function desenhaTextoComMoeda(frase, y, tamanhoTexto, corTexto) {
   let diametroMoeda = 28;
   let espaco = 8;
@@ -410,6 +417,7 @@ function desenhaTextoComMoeda(frase, y, tamanhoTexto, corTexto) {
   textAlign(CENTER, CENTER);
 }
 
+// Apresenta o total de moedas recebido na partida.
 function desenhaRecompensaPartida(y, tamanhoTexto) {
   desenhaTextoComMoeda(
     `Ganhaste ${moedasGanhasNaPartida} moedas nesta partida`,
@@ -419,7 +427,7 @@ function desenhaRecompensaPartida(y, tamanhoTexto) {
   );
 }
 
-// ECRÃ DE FIM DE NÍVEL (RESULTADOS & RECOMPENSA)
+// Desenha os resultados do nível, a recompensa e os botões seguintes.
 function desenhaFimNivel() {
   desenhaFundoMarinho();
 
@@ -460,10 +468,10 @@ function desenhaFimNivel() {
     text("ℹ️ Necessário 100% de limpeza para desbloquear o próximo nível!", width / 2, 310);
   }
 
-  // Botões de Ação
+  // Desenha os botões disponíveis após concluir o nível.
   rectMode(CORNER);
 
-  // Botão Loja
+  // Desenha o botão que abre a loja.
   fill(40, 120, 180);
   stroke(255);
   strokeWeight(2);
@@ -474,7 +482,7 @@ function desenhaFimNivel() {
   textAlign(CENTER, CENTER);
   text("Loja de Upgrades", width / 2 - 110, 435);
 
-  // Botão de seleção disponível em todos os resultados
+  // Desenha o botão que abre a seleção de níveis.
   fill(50, 150, 110);
   stroke(255);
   strokeWeight(2);
@@ -485,7 +493,7 @@ function desenhaFimNivel() {
   text("🗺 Escolher Nível", width / 2 + 110, 435);
 }
 
-// ECRÃ DA LOJA DE UPGRADES
+// Desenha o saldo, os upgrades compráveis e o botão de regresso.
 function desenhaLoja() {
   desenhaFundoMarinho();
 
@@ -500,14 +508,14 @@ function desenhaLoja() {
   textSize(30);
   text("LOJA DE MELHORIAS", width / 2, 120);
 
-  // Saldo Atual
+  // Apresenta o tesouro disponível.
   drawGoldCoin(width / 2 - 92, 150, 12);
   fill(255);
   textAlign(LEFT, CENTER);
   textSize(18);
   text(`Tesouro: ${moedas} moedas`, width / 2 - 73, 150);
 
-  // Item 1: Jato Mais Largo
+  // Desenha o cartão e o progresso do upgrade de largura do jato.
   let hoverJato = mouseX > width / 2 - 240 && mouseX < width / 2 - 20 && mouseY > 195 && mouseY < 420;
   fill(20, 60, 95);
   stroke(hoverJato ? color(255, 220, 80) : color(100, 150, 180));
@@ -529,7 +537,7 @@ function desenhaLoja() {
   fill(180, 220, 255);
   text("Aumenta o raio de alcance", width / 2 - 130, 300);
 
-  // Botão Comprar Item 1
+  // Desenha o botão de compra do upgrade de largura.
   rectMode(CORNER);
   fill(upgradeLargo < 5 && moedas >= precosUpgradeLargo[upgradeLargo] ? color(50, 200, 120) : color(80, 90, 100));
   stroke(255);
@@ -540,7 +548,7 @@ function desenhaLoja() {
   textAlign(CENTER, CENTER);
   text(upgradeLargo >= 5 ? "MÁXIMO" : `Próximo nível: ${precosUpgradeLargo[upgradeLargo]} M`, width / 2 - 130, 390);
 
-  // Item 2: Tolerância de Pressão
+  // Desenha o cartão e o progresso do upgrade de tolerância.
   let hoverTolerancia = mouseX > width / 2 + 20 && mouseX < width / 2 + 240 && mouseY > 195 && mouseY < 420;
   rectMode(CENTER);
   fill(20, 60, 95);
@@ -563,7 +571,7 @@ function desenhaLoja() {
   fill(180, 220, 255);
   text("Alarga a faixa de pressão ideal", width / 2 + 130, 300);
 
-  // Botão Comprar Item 2
+  // Desenha o botão de compra do upgrade de tolerância.
   rectMode(CORNER);
   fill(upgradeTolerancia < 5 && moedas >= precosUpgradeTolerancia[upgradeTolerancia] ? color(50, 200, 120) : color(80, 90, 100));
   stroke(255);
@@ -574,7 +582,7 @@ function desenhaLoja() {
   textAlign(CENTER, CENTER);
   text(upgradeTolerancia >= 5 ? "MÁXIMO" : `Próximo nível: ${precosUpgradeTolerancia[upgradeTolerancia]} M`, width / 2 + 130, 390);
 
-  // Botão Voltar (Ajusta o texto dinamicamente consoante a origem)
+  // Desenha o botão de regresso com o texto correspondente ao ecrã de origem.
   fill(40, 140, 200);
   stroke(255);
   rect(width / 2 - 120, 435, 240, 45, 10);
@@ -589,7 +597,7 @@ function desenhaLoja() {
   }
 }
 
-// ECRÃ DE GAME OVER / DERROTA
+// Desenha a derrota, o resultado da limpeza e as ações disponíveis.
 function desenhaGameOver() {
   desenhaFundoMarinho();
 
@@ -643,7 +651,7 @@ function desenhaGameOver() {
   text("🗺 Escolher Nível", width / 2, 455);
 }
 
-// ECRÃ DE VITÓRIA FINAL (PARABÉNS - JOGO CONCLUÍDO)
+// Desenha a conclusão do último nível, o tesouro total e o regresso ao menu.
 function desenhaVitoriaFinal() {
   desenhaFundoMarinho();
 
@@ -674,7 +682,7 @@ function desenhaVitoriaFinal() {
     color(255, 215, 0)
   );
 
-  // Exibe o Tesouro Total Acumulado
+  // Apresenta o saldo de moedas acumulado.
   desenhaTextoComMoeda(
     `Tesouro Total: ${moedas} Moedas`,
     height / 2 + 48,
@@ -693,7 +701,7 @@ function desenhaVitoriaFinal() {
     text("Sem moedas neste nível: o recife ficou com menos de 50% de saúde.", width / 2, height / 2 + 94);
   }
 
-  // Botão Voltar ao Menu Inicial
+  // Desenha o botão que regressa ao menu inicial.
   rectMode(CORNER);
   let emCimaBtn = mouseX > width / 2 - 120 && mouseX < width / 2 + 120 && mouseY > 425 && mouseY < 475;
   
@@ -708,7 +716,7 @@ function desenhaVitoriaFinal() {
   text("🏠 Menu Inicial", width / 2, 450);
 }
 
-// ECRÃ DE SELEÇÃO DE NÍVEIS
+// Desenha os níveis desbloqueados e os botões apropriados à origem da seleção.
 function desenhaSelecaoNiveis() {
   desenhaFundoMarinho();
 
@@ -728,7 +736,7 @@ function desenhaSelecaoNiveis() {
   textSize(15);
   text("Escolha um nível desbloqueado para jogar e acumular moedas:", width / 2, height / 2 - 75);
 
-  // Renderiza os 5 Cartões de Nível
+  // Desenha um cartão para cada nível e indica se está desbloqueado.
   for (let i = 1; i <= totalNiveis; i++) {
     let bx = 160 + (i - 1) * 120;
     let by = height / 2 - 10;
@@ -736,7 +744,7 @@ function desenhaSelecaoNiveis() {
 
     let emCima = desbloqueado && (mouseX > bx - 45 && mouseX < bx + 45 && mouseY > by - 40 && mouseY < by + 40);
 
-    // Fundo do botão
+    // Define a cor e o contorno conforme o estado do nível e do cursor.
     rectMode(CENTER);
     if (desbloqueado) {
       fill(emCima ? color(60, 230, 150) : color(30, 150, 100));
@@ -748,13 +756,13 @@ function desenhaSelecaoNiveis() {
     strokeWeight(2);
     rect(bx, by, 90, 80, 10);
 
-    // Texto do Nível
+    // Identifica o número do nível no cartão.
     noStroke();
     fill(desbloqueado ? color(255) : color(140, 150, 165));
     textSize(22);
     text(`Nível ${i}`, bx, by - 12);
 
-    // Ícone de estado
+    // Indica com uma estrela ou um cadeado o estado de desbloqueio.
     textSize(16);
     if (desbloqueado) {
       fill(255, 220, 80);
@@ -767,6 +775,7 @@ function desenhaSelecaoNiveis() {
 
   rectMode(CORNER);
   if (origemSelecaoNiveis === "jogo") {
+    // Permite retomar a partida pausada ou regressar ao menu.
     let hoverJogo = mouseX > 170 && mouseX < 390 && mouseY > 460 && mouseY < 510;
     fill(hoverJogo ? color(70, 190, 240) : color(35, 130, 185));
     stroke(255);
@@ -786,6 +795,7 @@ function desenhaSelecaoNiveis() {
     noStroke();
     text("🏠 Voltar ao Menu", 520, 485);
   } else {
+    // Permite regressar ao menu quando a seleção foi aberta a partir dele.
     let hoverVoltar = mouseX > width / 2 - 100 && mouseX < width / 2 + 100 && mouseY > 460 && mouseY < 505;
     fill(hoverVoltar ? color(70, 190, 240) : color(35, 130, 185));
     stroke(255);

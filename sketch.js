@@ -1,9 +1,8 @@
-// Reef Cleaner - Principal com Níveis, Recompensas e Loja
-// Sistemas Multimédia | ECGM | 2026-2027
+// Mantém o estado que determina o ecrã atualmente apresentado.
 
-let estado = "inicio"; // "inicio", "calibrando", "execucao", "fimNivel", "loja", "gameOver"
+let estado = "inicio"; // Identifica o menu, a calibração, a partida ou um ecrã de resultado.
 
-// Áudio e Calibração
+// Guarda o microfone e os dados usados para calibrar e reproduzir os sons do jogo.
 let mic;
 let tempoCalibracao = 3;
 let cronometroCalib = 0;
@@ -28,13 +27,12 @@ let filaFeedback = [];
 let indiceFeedback = 0;
 let proximoFeedbackEm = 0;
 
-// Limiares de Pressão
+// Define o limiar mínimo do jato e os limites iniciais da faixa de pressão ideal.
 let limiteMinimo = 0.05;
-let limiteMaximo = 0.60;
 let faixaIdealMin = 0.15;
 let faixaIdealMax = 0.35;
 
-// Dados Globais de Progressão
+// Guarda o nível, os recursos, o tempo, a saúde e a limpeza da partida atual.
 let nivelAtual = 1;
 let totalNiveis = 5;
 let moedas = 0;
@@ -50,50 +48,58 @@ let tabelaRecompensasAberta = false;
 let origemSelecaoNiveis = "menu";
 let tempoPausadoNaSelecao = 0;
 
-// Upgrades da Loja
+// Regista os níveis comprados e o preço de cada melhoria disponível.
 let upgradeLargo = 0;       // Aumenta o raio do jato
 let upgradeTolerancia = 0;  // Alarga a faixa verde ideal
 let estadoAnteriorLoja = "execucao"; // Guarda se veio de "execucao" ou "fimNivel"
 const precosUpgradeLargo = [20, 45, 80, 130, 200];
 const precosUpgradeTolerancia = [25, 55, 95, 150, 220];
 
-// Objetos e Listas
+// Mantém a ferramenta do jogador e as manchas de sujidade do nível.
 let limpador;
 let listaSujidade = [];
-let totalSujidadeInicial = 0; 
+let totalSujidadeInicial = 0;
 
+// Cria o canvas, o microfone, a ferramenta e as fontes de áudio filtradas.
 function setup() {
   createCanvas(800, 600);
   mic = new p5.AudioIn();
   limpador = new Limpador();
 
+  // Cria a melodia principal e limita as suas frequências mais agudas.
   notaMusica = new p5.Oscillator("sine");
   filtroMusica = new p5.LowPass();
   filtroMusica.process(notaMusica, 1500);
   notaMusica.amp(0);
 
+  // Cria a linha de baixo e limita as suas frequências mais agudas.
   notaBaixo = new p5.Oscillator("sine");
   filtroBaixo = new p5.LowPass();
   filtroBaixo.process(notaBaixo, 450);
   notaBaixo.amp(0);
 
+  // Cria o ruído filtrado que acompanha o jato enquanto está ativo.
   somJato = new p5.Noise("pink");
   filtroJato = new p5.LowPass();
   filtroJato.process(somJato, 850);
   somJato.amp(0);
 
+  // Cria o oscilador usado nos sons de limpeza, vitória e derrota.
   somFeedback = new p5.Oscillator("triangle");
   filtroFeedback = new p5.LowPass();
   filtroFeedback.process(somFeedback, 1800);
   somFeedback.amp(0);
 
+  // Inicia as fontes silenciosas e aguarda uma interação para desbloquear o áudio.
   iniciaFontesAudio();
   document.addEventListener("pointerdown", ativaAudioJogo, { once: true });
 }
 
+// Desenha o estado atual e atualiza os sons e elementos persistentes em cada frame.
 function draw() {
   background(20, 90, 120);
 
+  // Chama o desenho ou a atualização correspondente ao estado atual.
   if (estado === "inicio") {
     desenhaInicio();
   } else if (estado === "calibrando") {
@@ -112,6 +118,7 @@ function draw() {
     desenhaGameOver();
   }
 
+  // Desliga o jato fora da partida e mantém a música, os efeitos e o rodapé atualizados.
   if (estado !== "execucao") {
     atualizaSomJato(false);
   }
@@ -120,11 +127,13 @@ function draw() {
   desenhaRodape();
 }
 
+// Solicita ao browser a ativação do áudio e garante que as fontes foram iniciadas.
 function ativaAudioJogo() {
   userStartAudio();
   iniciaFontesAudio();
 }
 
+// Inicia cada fonte sonora uma única vez e guarda o instante inicial da música.
 function iniciaFontesAudio() {
   if (!audioAmbienteIniciado) {
     notaMusica.start();
@@ -136,6 +145,7 @@ function iniciaFontesAudio() {
   }
 }
 
+// Avança a melodia e o baixo de acordo com o tempo decorrido desde o início.
 function atualizaMusicaFundo() {
   if (!audioAmbienteIniciado) return;
 
@@ -161,6 +171,7 @@ function atualizaMusicaFundo() {
   }
 }
 
+// Altera o volume do ruído do jato apenas quando o estado ativo muda.
 function atualizaSomJato(ativo) {
   if (!audioAmbienteIniciado || ativo === jatoSonoroAtivo) return;
 
@@ -168,6 +179,7 @@ function atualizaSomJato(ativo) {
   jatoSonoroAtivo = ativo;
 }
 
+// Substitui a sequência de notas pendente e agenda a primeira nota.
 function tocaSequenciaFeedback(notas) {
   if (!audioAmbienteIniciado) return;
   filaFeedback = notas;
@@ -175,6 +187,7 @@ function tocaSequenciaFeedback(notas) {
   proximoFeedbackEm = millis();
 }
 
+// Toca as notas de feedback na ordem e no instante definidos por cada nota.
 function processaFeedbackAudio() {
   if (!audioAmbienteIniciado || filaFeedback.length === 0) return;
   if (millis() < proximoFeedbackEm) return;
@@ -195,6 +208,7 @@ function processaFeedbackAudio() {
   proximoFeedbackEm = millis() + nota.duracao;
 }
 
+// Toca uma sequência ascendente quando todas as manchas de um coral desaparecem.
 function tocaSomCoralLimpo() {
   tocaSequenciaFeedback([
     { frequencia: 880, duracao: 75, volume: 0.08 },
@@ -203,6 +217,7 @@ function tocaSomCoralLimpo() {
   ]);
 }
 
+// Toca uma sequência de vitória ou de derrota conforme o resultado do nível.
 function tocaSomNivelConcluido(sucesso) {
   if (sucesso) {
     tocaSequenciaFeedback([
@@ -220,21 +235,22 @@ function tocaSomNivelConcluido(sucesso) {
   }
 }
 
+// Inicializa os dados de um nível, gera a sujidade e inicia o cronómetro.
 function iniciaNivel(numNivel) {
   nivelAtual = numNivel;
-  tempoLimiteNivel = max(40, 65 - nivelAtual * 5); // Menos tempo em níveis avançados
+  tempoLimiteNivel = max(40, 65 - nivelAtual * 5);
   tempoRestante = tempoLimiteNivel;
   percentagemLimpa = 0.0;
   saudeRecife = 100;
   moedasGanhasNaPartida = 0;
   tabelaRecompensasAberta = false;
 
-  // Aumenta a quantidade e o tamanho inicial das manchas de sujidade
+  // Gera as manchas que serão distribuídas pelos corais neste nível.
   listaSujidade = [];
-  let qtdSujidade = 14 + nivelAtual * 6; // Anteriormente 10 + nivelAtual * 5
+  let qtdSujidade = 14 + nivelAtual * 6;
   listaSujidade = geraSujidadeAleatoria(qtdSujidade);
 
-  // Recalcula o total inicial exato das novas manchas
+  // Soma os raios iniciais para calcular a percentagem limpa durante a partida.
   totalSujidadeInicial = 0;
   for (let m of listaSujidade) {
     totalSujidadeInicial += m.raioInicial;
@@ -244,10 +260,11 @@ function iniciaNivel(numNivel) {
   estado = "execucao";
 }
 
+// Atualiza o tempo, a limpeza, a saúde, os sons e o HUD durante a partida.
 function executaJogo() {
   let vol = mic.getLevel();
 
-  // Gestão do Tempo
+  // Mantém o tempo restante parado enquanto o modal de recompensas está aberto.
   if (tabelaRecompensasAberta) {
     cronometroJogo += deltaTime;
   } else {
@@ -257,15 +274,15 @@ function executaJogo() {
 
   limpador.atualiza(vol);
 
-  // Fundo Marinho
+  // Desenha o cenário atrás dos elementos da partida.
   desenhaFundoMarinho();
 
-  // Tolerância aumentada pelos upgrades
+  // Ajusta os limites ideais de pressão com base no nível do upgrade de tolerância.
   let tolMin = max(0.05, faixaIdealMin - upgradeTolerancia * 0.02);
   let tolMax = min(1, faixaIdealMax + upgradeTolerancia * 0.03);
 
   let raioJatoBase = map(vol, limiteMinimo, 1, 30, 90);
-  let raioJato = raioJatoBase + (upgradeLargo * 12); // Upgrade de largura
+  let raioJato = raioJatoBase + (upgradeLargo * 12);
   let dentroDaZonaIdeal = (vol >= tolMin && vol <= tolMax);
   let pressaoExcessiva = vol >= limiteMinimo && vol > tolMax;
 
@@ -274,9 +291,9 @@ function executaJogo() {
     listaSujidade.some(m => m.idCoral === idCoral && !m.limpa)
   );
 
+  // Aplica a limpeza apenas se o jato estiver ativo, não estiver em sobrepressão e o modal estiver fechado.
   for (let m of listaSujidade) {
     if (!tabelaRecompensasAberta && vol >= limiteMinimo && !pressaoExcessiva) {
-      // Passa o nivelAtual para aumentar a resistência da sujidade nos níveis avançados
       m.limpar(mouseX, mouseY, raioJato, dentroDaZonaIdeal, nivelAtual);
     }
     m.desenhar();
@@ -286,6 +303,7 @@ function executaJogo() {
     }
   }
 
+  // Toca o efeito sonoro uma vez quando cada coral fica sem manchas.
   for (let i = 0; i < coraisSujosAntes.length; i++) {
     let aindaSujo = listaSujidade.some(m => m.idCoral === i && !m.limpa);
     if (coraisSujosAntes[i] && !aindaSujo) {
@@ -293,7 +311,7 @@ function executaJogo() {
     }
   }
 
-  // Atualiza percentagem limpa
+  // Calcula a percentagem limpa a partir dos raios de sujidade restantes.
   if (totalSujidadeInicial > 0) {
     let limpo = totalSujidadeInicial - sujidadeRestante;
     percentagemLimpa = constrain((limpo / totalSujidadeInicial) * 100, 0, 100);
@@ -302,8 +320,10 @@ function executaJogo() {
   if (!tabelaRecompensasAberta && pressaoExcessiva) {
     saudeRecife = max(0, saudeRecife - 4.5 * deltaTime / 1000);
   }
+  // Mantém o efeito do jato ligado em qualquer pressão acima do limiar mínimo.
   atualizaSomJato(!tabelaRecompensasAberta && vol >= limiteMinimo);
 
+  // Desenha a ferramenta, o HUD, o medidor e os avisos da partida.
   limpador.desenha(tolMin, tolMax, raioJato);
 
   desenhaHUD();
@@ -315,14 +335,15 @@ function executaJogo() {
     desenhaModalRecompensas();
   }
 
-  // Verificação de Fim de Nível (Exige 100% para Vitória)
+  // Conclui o nível ao limpar tudo ou quando o tempo se esgota.
   if (!tabelaRecompensasAberta && percentagemLimpa >= 100) {
     concluiNivel(true);
   } else if (!tabelaRecompensasAberta && tempoRestante <= 0) {
-    concluiNivel(false); // Tempo esgotado sem atingir 100% = Derrota
+    concluiNivel(false);
   }
 }
 
+// Calcula e atribui a recompensa e atualiza o estado de progressão do jogo.
 function concluiNivel(sucesso) {
   tocaSomNivelConcluido(sucesso);
   moedasGanhasNaPartida = 0;
@@ -338,14 +359,13 @@ function concluiNivel(sucesso) {
   moedas += moedasGanhasNaPartida;
 
   if (sucesso) {
-    // Se completou o nível atual a 100%, desbloqueia o nível seguinte
+    // Desbloqueia o nível seguinte ou apresenta a vitória ao concluir o último.
     if (nivelAtual < totalNiveis) {
       if (nivelAtual + 1 > nivelMaximoDesbloqueado) {
         nivelMaximoDesbloqueado = nivelAtual + 1;
       }
       estado = "fimNivel";
     } else {
-      // Se concluiu o último nível (Nível 5) a 100%
       estado = "vitoriaFinal";
     }
   } else {
@@ -353,11 +373,10 @@ function concluiNivel(sucesso) {
   }
 }
 
-// Restaura o estado global do jogo para um novo começo
-// Restaura o estado global do jogo para um novo começo (Nível 1 de raiz)
+// Repõe o nível, as moedas, os upgrades e os resultados para uma nova partida.
 function resetaJogoCompleto() {
   nivelAtual = 1;
-  nivelMaximoDesbloqueado = 1; // Voltar a ter apenas o Nível 1 desbloqueado
+  nivelMaximoDesbloqueado = 1;
   moedas = 0;
   upgradeLargo = 0;
   upgradeTolerancia = 0;
@@ -369,6 +388,7 @@ function resetaJogoCompleto() {
   tempoRestante = 60;
 }
 
+// Mede o ruído ambiente durante três segundos e desenha o progresso da calibração.
 function processaCalibracao() {
   let volumeAtual = mic.getLevel();
   somaRuido += volumeAtual;
@@ -399,6 +419,7 @@ function processaCalibracao() {
   fill(255, 220, 80);
   text(restante.toFixed(1) + "s", width / 2, height / 2 + 25);
 
+  // Converte o tempo decorrido na largura preenchida da barra de progresso.
   let progresso = map(tempoDecorrido, 0, tempoCalibracao, 0, 400);
   progresso = constrain(progresso, 0, 400);
 
@@ -419,6 +440,7 @@ function processaCalibracao() {
   }
 }
 
+// Converte o ruído medido nos limites mínimo e ideal do microfone.
 function aplicaCalibracao(valor) {
   ruidoBase = valor;
   limiteMinimo = max(0.03, ruidoBase * 1.8);
@@ -426,6 +448,7 @@ function aplicaCalibracao(valor) {
   faixaIdealMax = limiteMinimo + 0.28;
 }
 
+// Aplica e guarda a calibração no armazenamento local do browser.
 function guardaCalibracao(valor) {
   aplicaCalibracao(valor);
   try {
@@ -437,6 +460,7 @@ function guardaCalibracao(valor) {
   }
 }
 
+// Lê e valida a calibração guardada antes de a aplicar ao jogo.
 function carregaCalibracao() {
   let valorGuardado;
   try {
@@ -460,6 +484,7 @@ function carregaCalibracao() {
   return true;
 }
 
+// Inicia a calibração manual e define o ecrã de regresso após a contagem.
 function iniciaCalibracao() {
   ativaAudioJogo();
   mic.start();
@@ -470,9 +495,10 @@ function iniciaCalibracao() {
   estado = "calibrando";
 }
 
+// Direciona os cliques para os botões disponíveis no estado atual.
 function mousePressed() {
   if (estado === "inicio") {
-    // Botão "Jogar"
+    // Inicia o jogo com a calibração guardada ou começa uma nova medição.
     if (mouseX > width / 2 - 140 && mouseX < width / 2 + 140 &&
         mouseY > 385 && mouseY < 435) {
       ativaAudioJogo();
@@ -488,12 +514,12 @@ function mousePressed() {
       }
     }
 
-    // Botão secundário para recalibrar manualmente
+    // Inicia a calibração manual a partir do menu.
     if (mouseX > width / 2 - 180 && mouseX < width / 2 - 10 &&
         mouseY > 440 && mouseY < 480) {
       iniciaCalibracao();
     }
-    // Botão "🗺 Escolher Nível" (só fica ativo se já desbloqueaste mais de 1 nível)
+    // Abre a seleção de níveis quando existe pelo menos um nível desbloqueado.
     if (nivelMaximoDesbloqueado > 1 && 
         mouseX > width / 2 + 10 && mouseX < width / 2 + 180 && 
         mouseY > 440 && mouseY < 480) {
@@ -502,17 +528,17 @@ function mousePressed() {
     }
 
   } else if (estado === "selecaoNiveis") {
-    // Seleção dos Níveis 1 a 5
+    // Inicia o nível desbloqueado cujo cartão recebeu o clique.
     for (let i = 1; i <= totalNiveis; i++) {
       let bx = 160 + (i - 1) * 120;
       let by = height / 2 - 10;
       
-      // Deteta o clique em cada cartão de nível
+      // Calcula os limites do cartão de cada nível.
       if (mouseX > bx - 45 && mouseX < bx + 45 && mouseY > by - 40 && mouseY < by + 40) {
         if (i <= nivelMaximoDesbloqueado) {
           ativaAudioJogo();
           mic.start();
-          iniciaNivel(i); // Inicia o nível escolhido
+          iniciaNivel(i);
         }
       }
     }
@@ -539,14 +565,14 @@ function mousePressed() {
       return;
     }
 
-    // Clique no botão "🛒 Loja" do HUD
+    // Abre a loja e regista o instante em que a partida foi pausada.
     if (mouseX > 360 && mouseX < 435 && mouseY > 10 && mouseY < 40) {
       tempoPausadoNaLoja = millis();
       estadoAnteriorLoja = "execucao";
       estado = "loja";
     }
 
-    // Clique no botão "🗺 Níveis" do HUD (Voltar à seleção sem perder moedas/upgrades)
+    // Abre a seleção de níveis e regista o instante em que a partida foi pausada.
     if (mouseX > 440 && mouseX < 520 && mouseY > 10 && mouseY < 40) {
       origemSelecaoNiveis = "jogo";
       tempoPausadoNaSelecao = millis();
@@ -557,19 +583,19 @@ function mousePressed() {
     }
 
   } else if (estado === "fimNivel") {
-    // Ir para a Loja a partir do ecrã de resultados
+    // Abre a loja a partir do ecrã de resultados.
     if (mouseX > width / 2 - 210 && mouseX < width / 2 - 10 && mouseY > 410 && mouseY < 460) {
       estadoAnteriorLoja = "fimNivel";
       estado = "loja";
     }
-    // Botão "🗺 Escolher Nível"
+    // Abre a seleção de níveis a partir do ecrã de resultados.
     if (mouseX > width / 2 + 10 && mouseX < width / 2 + 210 && mouseY > 410 && mouseY < 460) {
       origemSelecaoNiveis = "menu";
       estado = "selecaoNiveis";
     }
 
   } else if (estado === "loja") {
-    // Upgrade 1: Jato Mais Largo
+    // Compra um nível do upgrade de largura se houver saldo e níveis disponíveis.
     if (mouseX > width / 2 - 240 && mouseX < width / 2 - 20 && mouseY > 370 && mouseY < 410) {
       let preco = precosUpgradeLargo[upgradeLargo];
       if (upgradeLargo < precosUpgradeLargo.length && moedas >= preco) {
@@ -577,7 +603,7 @@ function mousePressed() {
         upgradeLargo++;
       }
     }
-    // Upgrade 2: Tolerância de Pressão
+    // Compra um nível do upgrade de tolerância se houver saldo e níveis disponíveis.
     if (mouseX > width / 2 + 20 && mouseX < width / 2 + 240 && mouseY > 370 && mouseY < 410) {
       let preco = precosUpgradeTolerancia[upgradeTolerancia];
       if (upgradeTolerancia < precosUpgradeTolerancia.length && moedas >= preco) {
@@ -585,10 +611,10 @@ function mousePressed() {
         upgradeTolerancia++;
       }
     }
-    // Botão de Saída da Loja
+    // Fecha a loja e regressa à partida pausada ou aos resultados.
     if (mouseX > width / 2 - 120 && mouseX < width / 2 + 120 && mouseY > 435 && mouseY < 480) {
       if (estadoAnteriorLoja === "execucao") {
-        // Regressa à partida em curso e repõe o temporizador
+        // Acrescenta a duração da pausa ao cronómetro da partida.
         if (tempoPausadoNaLoja > 0) {
           let duracaoLoja = millis() - tempoPausadoNaLoja;
           cronometroJogo += duracaoLoja;
@@ -596,13 +622,13 @@ function mousePressed() {
         }
         estado = "execucao";
       } else {
-        // Regressa ao ecrã de Fim de Nível
+        // Regressa ao ecrã de resultados.
         estado = "fimNivel";
       }
     }
 
   } else if (estado === "gameOver") {
-    // Tentar Novamente no mesmo nível
+    // Reinicia o nível atual ou abre a seleção de níveis após a derrota.
     if (mouseX > width / 2 - 130 && mouseX < width / 2 + 130 && mouseY > 370 && mouseY < 420) {
       iniciaNivel(nivelAtual);
     }
@@ -612,7 +638,7 @@ function mousePressed() {
     }
 
   } else if (estado === "vitoriaFinal") {
-    // Clique no Botão "🏠 Menu Inicial"
+    // Repõe a progressão e regressa ao menu inicial.
     if (mouseX > width / 2 - 120 && mouseX < width / 2 + 120 && mouseY > 425 && mouseY < 475) {
       resetaJogoCompleto();
       estado = "inicio";
@@ -620,6 +646,7 @@ function mousePressed() {
   }
 }
 
+// Desenha a identificação do projeto nos cantos inferiores do canvas.
 function desenhaRodape() {
   rectMode(CORNER);
   fill(255);

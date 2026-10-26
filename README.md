@@ -1,6 +1,6 @@
 # Reef Cleaner
 
-Jogo interativo em **p5.js** sobre a recuperação de recifes de coral, controlado por **rato + microfone**.
+Jogo interativo desenvolvido em **p5.js** sobre a recuperação de recifes de coral, controlado pelo rato e pelo microfone.
 
 Trabalho prático de *Sistemas Multimédia* · Engenharia da Computação Gráfica e Multimédia (ECGM) · 2026-2027
 
@@ -8,70 +8,76 @@ Trabalho prático de *Sistemas Multimédia* · Engenharia da Computação Gráfi
 - **N.º de aluno:** 33782
 - **Tema atribuído:** Coral Reef Restoration
 
-> **Estado:** em desenvolvimento.
-
 ## Sobre o jogo
 
-O jogador restaura um recife de coral degradado e branqueado, removendo algas, sedimentos e lixo com um limpador subaquático suave.
+O jogador limpa manchas de sujidade nos corais com um jato controlado pelo volume captado pelo microfone. A ferramenta acompanha o cursor do rato. A pressão adequada limpa mais depressa; uma pressão abaixo da faixa ideal limpa mais lentamente e a sobrepressão interrompe a limpeza e reduz a saúde do recife.
 
-- O jogo tem **5 níveis**. Começa-se no nível 1, com a ferramenta de nível 1 e 0 moedas.
-- Cada nível dura **60 s**.
-- O **rato** move o limpador.
-- O **volume da voz/sopro** (microfone) controla a intensidade do jato, que é mais eficaz quanto mais perto estiver da zona ideal. Fraco demais não limpa; sobrepressão interrompe a limpeza e danifica progressivamente o recife.
-- A calibração do ruído ambiente dura 3 segundos e fica guardada no `localStorage` (`calibracaoRuido`); nas visitas seguintes, o botão **Jogar** inicia diretamente o nível 1. A recalibração manual regressa ao menu quando termina.
-- Cada nível começa com 100% de saúde. Se a saúde terminar abaixo de 50%, não são atribuídas moedas nesse nível.
-- Com saúde igual ou superior a 50%, a recompensa é 10, 15 ou 30 moedas por nível atual, respetivamente, para 75–89%, 90–99% ou 100% de limpeza.
-- As moedas servem para melhorar a ferramenta na loja: Jato Mais Largo e Tolerância de Pressão têm cinco níveis cada.
-- A saúde perde 4,5 pontos por segundo durante a sobrepressão. A limpeza ideal usa taxa base 0,075; os fatores de resistência são 0,8, 1,2, 1,6, 1,85 e 2,15, do nível 1 ao 5.
-- O jato visual e o medidor de pressão refletem os upgrades. A seleção de níveis, quando aberta durante uma partida, permite retomá-la com o tempo e o progresso preservados ou regressar ao menu.
-- Após a primeira ativação do áudio, o jogo reproduz uma música subaquática sintetizada em contínuo; um som de jato mais baixo toca sempre que o jato está ativo, seja a pressão ideal ou excessiva.
-- A música é uma melodia original, sintetizada com osciladores p5.sound. Sons curtos assinalam a limpeza completa de cada coral, a conclusão de um nível a 100% e a derrota por tempo esgotado.
-- **Objetivo final:** completar o nível 5 com 100% de limpeza.
+- O jogo tem **5 níveis**. O tempo limite é de **60, 55, 50, 45 e 40 segundos**, do nível 1 ao nível 5.
+- Cada nível começa com **100% de saúde**. A sobrepressão reduz a saúde em **4,5 pontos percentuais por segundo** enquanto se mantiver.
+- A calibração mede o ruído ambiente durante **3 segundos**. Ao carregar em **Jogar**, uma calibração guardada em `localStorage` (`calibracaoRuido`) é reutilizada; se não existir um valor válido, é feita uma nova calibração. **Recalibrar** inicia uma medição manual e regressa ao menu quando termina.
+- O nível mínimo de pressão e a faixa ideal são calculados a partir da calibração. O upgrade **Tolerância de Pressão** alarga a faixa ideal. Pressão acima dessa faixa causa dano e não limpa; pressão entre o mínimo e o início da faixa ideal limpa mais lentamente. Abaixo do mínimo, o jato não limpa.
+- A percentagem limpa é calculada comparando a soma dos raios iniciais das manchas com a soma dos raios que ainda restam; não é uma medição de píxeis.
+- Com saúde igual ou superior a **50%**, a recompensa é multiplicada pelo nível atual: **10 moedas** para 75–89% de limpeza, **15 moedas** para 90–99% e **30 moedas** para 100%. Abaixo de 75% não há recompensa. Com saúde inferior a 50%, não se recebem moedas, independentemente da limpeza.
+- É necessário limpar **100%** para concluir o nível e desbloquear o seguinte. Se o tempo terminar antes disso, a partida termina sem desbloquear outro nível.
+- A loja tem dois upgrades de cinco níveis: **Jato Mais Largo** (20, 45, 80, 130 e 200 moedas) e **Tolerância de Pressão** (25, 55, 95, 150 e 220 moedas). Os valores são os preços de cada compra sucessiva.
+- A seleção de níveis mostra apenas os níveis desbloqueados. Se for aberta durante uma partida, permite retomá-la com o tempo e o progresso preservados ou regressar ao menu.
+- O cenário inclui bolhas animadas, peixes decorativos, um navio, conchas e corais. As manchas de sujidade são geradas em posições aleatórias junto dos corais; os peixes têm posições iniciais definidas no código.
+- A música e os efeitos são sintetizados com p5.sound. O som do jato toca acima do limiar mínimo, incluindo em sobrepressão; outros sons assinalam a limpeza de um coral, a conclusão de um nível e a derrota.
+- **Objetivo final:** concluir os cinco níveis, limpando cada um a 100%.
 
-## Funcionalidades planeadas
+## Controlos e ecrãs
 
-- Controlo apenas por microfone + rato
-- Calibração do microfone e histerese entre dois limiares
-- Limpeza por camada de sujidade, com % limpa calculada por amostragem de píxeis
-- Aleatoriedade controlada (sujidade e peixes gerados aleatoriamente)
-- Colisões entre objetos (jato, sujidade, peixes, corais)
-- Sons e feedback constante (tempo, % limpa, moedas, nível, saúde do recife)
-- Ecrãs: Início, Execução, Resultado/Repetir e Loja de upgrades
-- Sistema de moedas e upgrades da ferramenta
+- **Rato:** move a ferramenta e posiciona o jato.
+- **Microfone:** a voz ou o sopro controlam a pressão. O browser tem de permitir o acesso ao microfone.
+- **Jogar:** inicia o nível 1, usando a calibração guardada ou pedindo uma nova calibração.
+- **Recalibrar:** mede novamente o ruído ambiente e regressa ao menu.
+- Durante a partida, o HUD dá acesso à loja, à seleção de níveis e à tabela de recompensas. A loja e a seleção pausam o cronómetro da partida.
+- O jogo inclui menu inicial, calibração, partida, modal de recompensas, loja, seleção de níveis, resultados, derrota e ecrã de vitória final.
+
+## Persistência
+
+O valor da calibração do microfone é guardado no `localStorage` do browser. Moedas, upgrades e níveis desbloqueados existem apenas enquanto a página do jogo está aberta; não são guardados entre carregamentos da página.
 
 ## Como executar
 
 1. Clonar o repositório:
-```bash
+
+   ```bash
    git clone https://github.com/freitaslandre/Reef-Cleaner.git
-```
-2. Abrir a pasta num servidor local (por exemplo, a extensão *Live Server* do VS Code). O acesso ao microfone exige `localhost` ou HTTPS.
-3. Abrir `index.html` no browser e **permitir o acesso ao microfone**.
+   ```
 
-## Estrutura (prevista)
+2. Abrir a pasta num servidor local, por exemplo com a extensão *Live Server* do VS Code.
+3. Abrir `index.html` no browser e permitir o acesso ao microfone.
 
-```
+O acesso ao microfone requer `localhost` ou HTTPS. Os browsers podem bloquear a reprodução automática de áudio; se isso acontecer, interagir com a página desbloqueia o áudio. O canvas tem dimensões fixas de **800 × 600**.
+
+## Estrutura do projeto
+
+```text
 Reef-Cleaner/
-├── index.html
-├── sketch.js         # Script principal e máquina de estados
-├── UI.js             # Gestão da interface, HUD, medidor do microfone e navio
-├── Player.js         # Classe do limpador e jato de pressão
-├── p5/               # Bibliotecas p5.js e p5.sound locais
-├── assets/           # Imagens, sons e recursos multimédia (futuro)
-├── DIARIO.md         # Diário de desenvolvimento da disciplina
+├── index.html             # Carrega as bibliotecas e os scripts do jogo
+├── sketch.js              # Estado, regras, calibração, áudio e eventos de rato
+├── Dirt.js                # Manchas de sujidade e respetiva limpeza
+├── UI.js                  # Cenário, HUD, loja e ecrãs
+├── player.js              # Ferramenta do jogador e representação do jato
+├── Assets.js              # Desenhos procedurais usados pela interface e cenário
+├── p5/
+│   ├── p5.js              # Biblioteca p5.js
+│   └── soundlib/
+│       └── p5.sound.js    # Biblioteca de áudio p5.sound
+├── DIARIO.md              # Diário de desenvolvimento
 └── README.md
 ```
 
 ## Créditos
 
-Material não original (imagens, sons, bibliotecas) será indicado aqui, com a respetiva origem.
-
-- [p5.js](https://p5js.org/) e p5.sound
+- [p5.js](https://p5js.org/) e p5.sound — bibliotecas usadas para desenho, interação e áudio.
+- Os elementos visuais do jogo são desenhados proceduralmente em `Assets.js`; a música e os efeitos sonoros são gerados com osciladores e ruído do p5.sound. O projeto não carrega ficheiros externos de imagem ou de áudio.
 
 ## Utilização de IA
 
-Foi usada IA generativa como apoio à ideia, ao planeamento e à revisão. O registo detalhado consta do diário de desenvolvimento.
+Foi utilizada IA generativa como apoio ao desenvolvimento, à revisão e à documentação do projeto. O diário de desenvolvimento regista as ferramentas e utilizações descritas em cada sessão.
 
-## Diário de Desenvolvimento
+## Diário de desenvolvimento
 
-O registo de cada sessão de trabalho, decisões tomadas, problemas encontrados e utilização de ferramentas de IA pode ser consultado no ficheiro [DIARIO.md](./DIARIO.md).
+O registo das sessões, decisões, problemas e utilização de ferramentas de IA encontra-se em [DIARIO.md](./DIARIO.md).
