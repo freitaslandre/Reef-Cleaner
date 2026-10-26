@@ -27,6 +27,7 @@ let percentagemLimpa = 0.0;
 let saudeRecife = 100;
 let cronometroJogo = 0;
 let tempoPausadoNaLoja = 0;
+let nivelMaximoDesbloqueado = 1; // Controla o progresso máximo já atingido
 
 // Upgrades da Loja
 let upgradeLargo = 0;       // Aumenta o raio do jato
@@ -36,7 +37,7 @@ let estadoAnteriorLoja = "execucao"; // Guarda se veio de "execucao" ou "fimNive
 // Objetos e Listas
 let limpador;
 let listaSujidade = [];
-let totalSujidadeInicial = 0;
+let totalSujidadeInicial = 0; 
 
 function setup() {
   createCanvas(800, 600);
@@ -55,6 +56,8 @@ function draw() {
     executaJogo();
   } else if (estado === "fimNivel") {
     desenhaFimNivel();
+  } else if (estado === "selecaoNiveis") {
+    desenhaSelecaoNiveis();
   } else if (estado === "vitoriaFinal") {
     desenhaVitoriaFinal();
   } else if (estado === "loja") {
@@ -132,15 +135,11 @@ function executaJogo() {
   desenhaHUD();
   desenhaMedidorMicrofone(vol);
 
-  // Verificação de Fim de Nivel (Vitória ou Tempo Esgotado)
+  // Verificação de Fim de Nível (Exige 100% para Vitória)
   if (percentagemLimpa >= 100) {
     concluiNivel(true);
   } else if (tempoRestante <= 0) {
-    if (percentagemLimpa >= 70) {
-      concluiNivel(true); // Passa com pelo menos 70% limpo
-    } else {
-      concluiNivel(false); // Derrota
-    }
+    concluiNivel(false); // Tempo esgotado sem atingir 100% = Derrota
   }
 }
 
@@ -149,11 +148,15 @@ function concluiNivel(sucesso) {
     let moedasGanha = floor((percentagemLimpa / 10) * nivelAtual);
     moedas += moedasGanha;
 
-    // Se concluiu o último nível, vai para o ecrã especial de vitória final
-    if (nivelAtual >= totalNiveis) {
-      estado = "vitoriaFinal";
-    } else {
+    // Se completou o nível atual a 100%, desbloqueia o nível seguinte
+    if (nivelAtual < totalNiveis) {
+      if (nivelAtual + 1 > nivelMaximoDesbloqueado) {
+        nivelMaximoDesbloqueado = nivelAtual + 1;
+      }
       estado = "fimNivel";
+    } else {
+      // Se concluiu o último nível (Nível 5) a 100%
+      estado = "vitoriaFinal";
     }
   } else {
     estado = "gameOver";
@@ -164,11 +167,12 @@ function concluiNivel(sucesso) {
 // Restaura o estado global do jogo para um novo começo (Nível 1 de raiz)
 function resetaJogoCompleto() {
   nivelAtual = 1;
+  nivelMaximoDesbloqueado = 1; // Voltar a ter apenas o Nível 1 desbloqueado
   moedas = 0;
   upgradeLargo = 0;
   upgradeTolerancia = 0;
   percentagemLimpa = 0.0;
-  tempoLimiteNivel = 60; // Repõe o tempo inicial para 60 segundos
+  tempoLimiteNivel = 60;
   tempoRestante = 60;
 }
 
@@ -225,8 +229,9 @@ function processaCalibracao() {
 
 function mousePressed() {
   if (estado === "inicio") {
+    // Botão "Calibrar e Jogar"
     if (mouseX > width / 2 - 140 && mouseX < width / 2 + 140 &&
-        mouseY > 410 - 28 && mouseY < 410 + 28) {
+        mouseY > 385 && mouseY < 435) {
       userStartAudio();
       mic.start();
       somaRuido = 0;
@@ -234,28 +239,58 @@ function mousePressed() {
       cronometroCalib = millis();
       estado = "calibrando";
     }
+    // Botão "🗺 Escolher Nível" (só fica ativo se já desbloqueaste mais de 1 nível)
+    if (nivelMaximoDesbloqueado > 1 && 
+        mouseX > width / 2 - 140 && mouseX < width / 2 + 140 && 
+        mouseY > 450 && mouseY < 495) {
+      estado = "selecaoNiveis";
+    }
+
+  } else if (estado === "selecaoNiveis") {
+    // Seleção dos Níveis 1 a 5
+    for (let i = 1; i <= totalNiveis; i++) {
+      let bx = 160 + (i - 1) * 120;
+      let by = height / 2 - 10;
+      
+      // Deteta o clique em cada cartão de nível
+      if (mouseX > bx - 45 && mouseX < bx + 45 && mouseY > by - 40 && mouseY < by + 40) {
+        if (i <= nivelMaximoDesbloqueado) {
+          userStartAudio();
+          mic.start();
+          iniciaNivel(i); // Inicia o nível escolhido
+        }
+      }
+    }
+    // Botão "← Voltar ao Menu"
+    if (mouseX > width / 2 - 100 && mouseX < width / 2 + 100 && mouseY > 460 && mouseY < 505) {
+      estado = "inicio";
+    }
+
   } else if (estado === "execucao") {
-    // Clique no botão "🛒 Loja" do HUD durante o jogo
-    if (mouseX > 420 && mouseX < 510 && mouseY > 10 && mouseY < 40) {
+    // Clique no botão "🛒 Loja" do HUD
+    if (mouseX > 420 && mouseX < 500 && mouseY > 10 && mouseY < 40) {
       tempoPausadoNaLoja = millis();
       estadoAnteriorLoja = "execucao";
       estado = "loja";
     }
+
+    // Clique no botão "🗺 Níveis" do HUD (Voltar à seleção sem perder moedas/upgrades)
+    if (mouseX > 510 && mouseX < 600 && mouseY > 10 && mouseY < 40) {
+      percentagemLimpa = 0.0; // Reinicia a contagem de limpeza do nível atual
+      estado = "selecaoNiveis";
+    }
+
   } else if (estado === "fimNivel") {
-    // Ir para a Loja
+    // Ir para a Loja a partir do ecrã de resultados
     if (mouseX > width / 2 - 210 && mouseX < width / 2 - 10 && mouseY > 400 && mouseY < 450) {
       estadoAnteriorLoja = "fimNivel";
       estado = "loja";
     }
-    // Botão "Próximo Nível" / "Menu Inicial"
+    // Botão "🗺 Escolher Nível"
     if (mouseX > width / 2 + 10 && mouseX < width / 2 + 210 && mouseY > 400 && mouseY < 450) {
-      if (nivelAtual < totalNiveis) {
-        iniciaNivel(nivelAtual + 1);
-      } else {
-        resetaJogoCompleto();
-        estado = "inicio";
-      }
+      estado = "selecaoNiveis";
     }
+
   } else if (estado === "loja") {
     // Upgrade 1: Jato Mais Largo (15 moedas)
     if (mouseX > width / 2 - 240 && mouseX < width / 2 - 20 && mouseY > 330 && mouseY < 375) {
@@ -282,14 +317,17 @@ function mousePressed() {
         }
         estado = "execucao";
       } else {
-        // Regressa ao ecrã de Fim de Nível sem iniciar o próximo nível automaticamente
+        // Regressa ao ecrã de Fim de Nível
         estado = "fimNivel";
       }
     }
+
   } else if (estado === "gameOver") {
+    // Tentar Novamente no mesmo nível
     if (mouseX > width / 2 - 130 && mouseX < width / 2 + 130 && mouseY > 380 && mouseY < 430) {
       iniciaNivel(nivelAtual);
     }
+
   } else if (estado === "vitoriaFinal") {
     // Clique no Botão "🏠 Menu Inicial"
     if (mouseX > width / 2 - 120 && mouseX < width / 2 + 120 && mouseY > 410 && mouseY < 460) {

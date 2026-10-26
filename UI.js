@@ -136,60 +136,73 @@ function desenhaFundoMarinho() {
 function desenhaInicio() {
   desenhaFundoMarinho();
 
+  // Título Principal
   textAlign(CENTER, CENTER);
-  textSize(48);
-  fill(10, 40, 70, 150);
-  text("REEF CLEANER", width / 2 + 3, 83);
-  fill(255, 240, 180);
+  fill(255, 230, 110);
+  stroke(20, 50, 70);
+  strokeWeight(4);
+  textSize(42);
   text("REEF CLEANER", width / 2, 80);
 
-  fill(10, 35, 60, 210);
+  // Painel Principal de Instruções (Aumentada a altura para 250px)
+  fill(10, 35, 60, 220);
   stroke(80, 200, 240, 180);
   strokeWeight(2);
   rectMode(CENTER);
-  rect(width / 2, 250, 620, 220, 15);
+  rect(width / 2, 250, 580, 250, 15);
 
   noStroke();
   fill(255);
-  textSize(16);
-  text("Restaure o ecossistema limpando as algas e sedimentos dos corais!", width / 2, 175);
+  textSize(18);
+  text("Restaure o ecossistema limpando as algas e sedimentos dos corais!", width / 2, 160);
 
-  fill(20, 60, 95, 180);
-  rect(width / 2 - 140, 250, 250, 80, 10);
-  rect(width / 2 + 140, 250, 250, 80, 10);
+  // Cartões de Instruções (Rato vs Voz)
+  rectMode(CORNER);
+  fill(20, 50, 80, 180);
+  rect(width / 2 - 250, 190, 230, 70, 8);
+  rect(width / 2 + 20, 190, 230, 70, 8);
 
-  fill(255, 220, 100);
+  textAlign(CENTER, CENTER);
+  fill(255, 215, 0);
   textSize(15);
-  text("Rato", width / 2 - 140, 225);
-  text("Voz / Sopro", width / 2 + 140, 225);
+  text("Rato", width / 2 - 135, 210);
+  text("Voz / Sopro", width / 2 + 135, 210);
 
   fill(220);
   textSize(13);
-  text("Move a ferramenta", width / 2 - 140, 255);
-  text("Ajusta a pressão do jato", width / 2 + 140, 255);
+  text("Move a ferramenta", width / 2 - 135, 235);
+  text("Ajusta a pressão do jato", width / 2 + 135, 235);
 
   fill(180, 230, 255);
   textSize(14);
-  text("Recolha moedas do tesouro do navio e complete 100% dos 5 níveis!", width / 2, 325);
+  text("Recolha moedas do tesouro do navio e complete 100% dos 5 níveis!", width / 2, 335);
 
-  let emCima = mouseX > width / 2 - 140 && mouseX < width / 2 + 140 &&
-               mouseY > 410 - 28 && mouseY < 410 + 28;
-
-  if (emCima) {
-    fill(50, 220, 140);
-    stroke(255);
-  } else {
-    fill(35, 175, 110);
-    stroke(180, 255, 210);
-  }
-
+  // ---- BOTÃO 1: Calibrar e Jogar ----
+  rectMode(CORNER);
+  let emCimaCalib = mouseX > width / 2 - 140 && mouseX < width / 2 + 140 && mouseY > 380 && mouseY < 425;
+  fill(emCimaCalib ? color(60, 230, 150) : color(40, 180, 110));
+  stroke(255);
   strokeWeight(2);
-  rect(width / 2, 410, 280, 56, 12);
+  rect(width / 2 - 140, 380, 280, 45, 10);
 
   fill(255);
   noStroke();
-  textSize(20);
-  text("Calibrar e Jogar (3s)", width / 2, 410);
+  textSize(17);
+  text("Calibrar e Jogar (3s)", width / 2, 402.5);
+
+  // ---- BOTÃO 2: Escolher Nível (Se tiver mais de 1 nível desbloqueado) ----
+  if (typeof nivelMaximoDesbloqueado !== "undefined" && nivelMaximoDesbloqueado > 1) {
+    let emCimaNiveis = mouseX > width / 2 - 140 && mouseX < width / 2 + 140 && mouseY > 435 && mouseY < 480;
+    fill(emCimaNiveis ? color(70, 190, 240) : color(35, 130, 185));
+    stroke(255);
+    strokeWeight(2);
+    rect(width / 2 - 140, 435, 280, 45, 10);
+
+    fill(255);
+    noStroke();
+    textSize(16);
+    text("🗺 Escolher Nível", width / 2, 457.5);
+  }
 }
 
 // ECRÃ DE CALIBRAÇÃO
@@ -253,51 +266,54 @@ function processaCalibracao() {
 // HUD Superior
 // HUD Superior com Botão de Acesso à Loja
 function desenhaHUD() {
-  fill(10, 35, 60, 210);
-  noStroke();
   rectMode(CORNER);
+  fill(10, 35, 60, 200);
+  noStroke();
   rect(0, 0, width, 50);
 
-  stroke(80, 200, 240, 150);
-  strokeWeight(2);
-  line(0, 50, width, 50);
-
-  noStroke();
   fill(255);
   textAlign(LEFT, CENTER);
-  textSize(15);
-  text(`Nível: ${nivelAtual}`, 20, 25);
-  text(`Tempo: ${ceil(tempoRestante)}s`, 110, 25);
-  text(`Limpo: ${percentagemLimpa.toFixed(1)}%`, 210, 25);
+  textSize(16);
+  text(`Nível: ${nivelAtual}`, 30, 25);
+  text(`Tempo: ${ceil(tempoRestante)}s`, 125, 25);
+  text(`Limpo: ${percentagemLimpa.toFixed(1)}%`, 235, 25);
 
-  // Ícone de Moeda do Tesouro
-  drawGoldCoin(340, 25, 10);
-  fill(255, 220, 80);
-  textSize(15);
-  text(`${moedas}`, 358, 25);
+  // Exibe Moedas
+  drawGoldCoin(360, 25, 12);
+  fill(255, 215, 0);
+  textSize(16);
+  text(`${moedas}`, 380, 25);
 
-  // BOTÃO DA LOJA NO HUD (Área clicável: X entre 420 e 510, Y entre 10 e 40)
-  let emCimaLoja = mouseX > 420 && mouseX < 510 && mouseY > 10 && mouseY < 40;
-  
-  if (emCimaLoja) {
-    fill(60, 180, 240);
-    stroke(255);
-  } else {
-    fill(30, 90, 140);
-    stroke(80, 200, 240);
-  }
+  // ---- BOTÃO 1: 🛒 Loja ----
+  let emCimaLoja = mouseX > 420 && mouseX < 500 && mouseY > 10 && mouseY < 40;
+  fill(emCimaLoja ? color(70, 190, 240) : color(35, 130, 185));
+  stroke(255);
   strokeWeight(1.5);
-  rect(420, 10, 90, 30, 6);
+  rect(420, 10, 80, 30, 6);
 
   fill(255);
   noStroke();
   textAlign(CENTER, CENTER);
   textSize(13);
-  text("🛒 Loja", 465, 25);
+  text("🛒 Loja", 460, 25);
 
-  textAlign(LEFT, CENTER);
+  // ---- BOTÃO 2: 🗺 Níveis ----
+  let emCimaNiveis = mouseX > 510 && mouseX < 600 && mouseY > 10 && mouseY < 40;
+  fill(emCimaNiveis ? color(240, 160, 60) : color(200, 120, 30));
+  stroke(255);
+  strokeWeight(1.5);
+  rect(510, 10, 90, 30, 6);
+
   fill(255);
-  text(`Saúde Recife: ${saudeRecife}%`, 535, 25);
+  noStroke();
+  textSize(13);
+  text("🗺 Níveis", 555, 25);
+
+  // Saúde do Recife
+  textAlign(RIGHT, CENTER);
+  fill(255);
+  textSize(15);
+  text(`Saúde Recife: ${(100 - percentagemLimpa).toFixed(0)}%`, width - 30, 25);
 }
 
 // Medidor Vertical do Microfone
@@ -393,6 +409,17 @@ function desenhaFimNivel() {
   noStroke();
   textSize(18);
   text(nivelAtual < totalNiveis ? "Próximo Nível" : "Menu Inicial", width / 2 + 110, 425);
+
+  // Botão 2: Selecionar Nível / Continuar
+  let emCimaNiveis = mouseX > width / 2 + 10 && mouseX < width / 2 + 210 && mouseY > 400 && mouseY < 450;
+  fill(emCimaNiveis ? color(60, 230, 150) : color(40, 180, 110));
+  stroke(255);
+  strokeWeight(2);
+  rect(width / 2 + 10, 400, 200, 50, 10);
+  fill(255);
+  noStroke();
+  textSize(16);
+  text("🗺 Escolher Nível", width / 2 + 110, 425);
 }
 
 // ECRÃ DA LOJA DE UPGRADES
@@ -550,4 +577,75 @@ function desenhaVitoriaFinal() {
   noStroke();
   textSize(18);
   text("🏠 Menu Inicial", width / 2, 435);
+}
+
+// ECRÃ DE SELEÇÃO DE NÍVEIS
+function desenhaSelecaoNiveis() {
+  desenhaFundoMarinho();
+
+  fill(10, 35, 60, 220);
+  stroke(80, 200, 240, 200);
+  strokeWeight(2);
+  rectMode(CENTER);
+  rect(width / 2, height / 2, 680, 320, 15);
+
+  noStroke();
+  fill(255);
+  textAlign(CENTER, CENTER);
+  textSize(28);
+  text("SELEÇÃO DE NÍVEIS", width / 2, height / 2 - 110);
+
+  fill(180, 220, 255);
+  textSize(15);
+  text("Escolha um nível desbloqueado para jogar e acumular moedas:", width / 2, height / 2 - 75);
+
+  // Renderiza os 5 Cartões de Nível
+  for (let i = 1; i <= totalNiveis; i++) {
+    let bx = 160 + (i - 1) * 120;
+    let by = height / 2 - 10;
+    let desbloqueado = (i <= nivelMaximoDesbloqueado);
+
+    let emCima = desbloqueado && (mouseX > bx - 45 && mouseX < bx + 45 && mouseY > by - 40 && mouseY < by + 40);
+
+    // Fundo do botão
+    rectMode(CENTER);
+    if (desbloqueado) {
+      fill(emCima ? color(60, 230, 150) : color(30, 150, 100));
+      stroke(255);
+    } else {
+      fill(40, 50, 65, 180);
+      stroke(90, 100, 115);
+    }
+    strokeWeight(2);
+    rect(bx, by, 90, 80, 10);
+
+    // Texto do Nível
+    noStroke();
+    fill(desbloqueado ? color(255) : color(140, 150, 165));
+    textSize(22);
+    text(`Nível ${i}`, bx, by - 12);
+
+    // Ícone de estado
+    textSize(16);
+    if (desbloqueado) {
+      fill(255, 220, 80);
+      text("★", bx, by + 18);
+    } else {
+      fill(160);
+      text("🔒", bx, by + 18);
+    }
+  }
+
+  // Botão Voltar ao Menu
+  rectMode(CORNER);
+  let emCimaVoltar = mouseX > width / 2 - 100 && mouseX < width / 2 + 100 && mouseY > 460 && mouseY < 505;
+  fill(emCimaVoltar ? color(70, 190, 240) : color(35, 130, 185));
+  stroke(255);
+  strokeWeight(2);
+  rect(width / 2 - 100, 460, 200, 45, 10);
+
+  noStroke();
+  fill(255);
+  textSize(16);
+  text("← Voltar ao Menu", width / 2, 482);
 }
