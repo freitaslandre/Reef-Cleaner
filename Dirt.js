@@ -10,18 +10,25 @@ class ManchaSujidade {
     this.idCoral = idCoral; // Guarda a qual coral esta mancha pertence
   }
 
-  limpar(xLimpador, yLimpador, raioJato, dentroDaZonaIdeal) {
+  limpar(mx, my, raioJato, dentroDaZonaIdeal, nivel = 1) {
     if (this.limpa) return;
 
-    let d = dist(this.x, this.y, xLimpador, yLimpador);
+    let d = dist(mx, my, this.x, this.y);
 
-    if (d < this.raioAtual + raioJato / 2) {
-      if (dentroDaZonaIdeal) {
-        this.raioAtual -= 0.4;
-        if (this.raioAtual <= 3) {
-          this.raioAtual = 0;
-          this.limpa = true;
-        }
+    if (d < raioJato / 2) {
+      // Valores de limpeza drasticamente reduzidos (muito mais lentos)
+      // Fora da zona ideal limpa quase nada (0.015), na zona ideal limpa a ritmo controlado (0.05)
+      let taxaLimpezaBase = dentroDaZonaIdeal ? 0.05 : 0.015;
+      
+      // A resistência aumenta drasticamente com cada nível (+40% por nível)
+      let fatorResistenciaNivel = 1 + (nivel - 1) * 0.4;
+      let reducao = taxaLimpezaBase / fatorResistenciaNivel;
+
+      this.raioAtual -= reducao;
+
+      if (this.raioAtual <= 2) {
+        this.raioAtual = 0;
+        this.limpa = true;
       }
     }
   }

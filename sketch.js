@@ -111,7 +111,8 @@ function executaJogo() {
 
   for (let m of listaSujidade) {
     if (vol >= limiteMinimo) {
-      m.limpar(mouseX, mouseY, raioJato, dentroDaZonaIdeal);
+      // Passa o nivelAtual para aumentar a resistência da sujidade nos níveis avançados
+      m.limpar(mouseX, mouseY, raioJato, dentroDaZonaIdeal, nivelAtual);
     }
     m.desenhar();
 
