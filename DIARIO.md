@@ -280,3 +280,47 @@
 - Finalidade: Apoio na reestruturação matemática das posições dos corais, cálculos de dispersão de manchas e estruturação das funções do ecrã de vitória e reposição de estado.
 - Resultado utilizado: Função `desenhaVitoriaFinal()` em `UI.js`, nova distribuição em `geraSujidadeAleatoria()` e reset de variáveis em `sketch.js`.
 - Decisões minhas: Aprovação dos tamanhos e posições visuais dos corais em jogo, validação do nível de dificuldade das manchas e rejeição do cache automático de áudio em favor do fluxo manual.
+
+---
+
+## Sessão 10 – 26 de outubro de 2026
+
+**Objetivo:** Refinar as mecânicas de saúde e sobrepressão do recife, implementar o modal de recompensas no HUD, expandir a loja para 5 níveis de *upgrades*, adicionar persistência de calibração em `localStorage`, sincronizar os elementos visuais com os *upgrades*, integrar o sistema de áudio sintetizado e realizar a limpeza e documentação final do código.
+
+**Atividades realizadas:**
+- Implementei a mecânica de saúde do recife (iniciada a 100% por nível) e penalização por sobrepressão: quando o volume excede a faixa ideal, a limpeza para, causa dano ao recife ($4,5\text{ pts/s}$) e exibe o aviso intermitente "⚠️ PRESSÃO EXCESSIVA! A DANIFICAR CORAIS!".
+- Condicionei os ganhos de moedas no fim do nível à saúde final: se for inferior a 50%, o jogador recebe 0 moedas.
+- Criei o modal explicativo "🎁 Recompensas" no HUD superior com a tabela de cálculo de moedas ($75\%\rightarrow10\times\text{nível}$, $90\%\rightarrow15\times\text{nível}$, $100\%\rightarrow30\times\text{nível}$) e pausa automática da partida.
+- Expandi a loja de melhorias para 5 níveis de *upgrades* ("Jato Mais Largo" e "Tolerância de Pressão") com curva de preços progressiva ($20\rightarrow200$ e $25\rightarrow220$ moedas) e contornos dourados interativos.
+- Implementei a persistência da calibração do ruído em `localStorage`: o botão "Jogar" realiza a calibração de 3 segundos apenas na primeira execução (sem cache) e entra direto no jogo nas seguintes; o botão "⚙️ Recalibrar" permite refazer o processo manualmente e regressar ao menu inicial.
+- Ajustei a mecânica e curva de dificuldade: exigência estrita de 100% de limpeza para desbloquear o nível seguinte, navegação condicional na Seleção de Níveis (com opções "▶ Voltar ao Jogo" e "🏠 Voltar ao Menu" quando aberta a partir da partida) e afinação fina da resistência no Nível 5 (fator $2,15$) para garantir a jogabilidade até ao fim.
+- Sincronizei os *upgrades* visualmente: o diâmetro do círculo do jato no cursor passa a refletir o alcance real e a barra verde de tolerância do medidor de microfone expande à medida que se compram os *upgrades*.
+- Corrigi o cenário e a tipografia: criei uma duna de areia contínua sob o navio, removi os contornos espessos (`noStroke()`) dos textos do menu inicial e do ecrã de Vitória Final, e implementei a função auxiliar `desenhaTextoComMoeda()` para centralização geométrica perfeita do bloco [ÍCONE + TEXTO].
+- Desenvolvi um sistema completo de áudio sintetizado em tempo real com `p5.sound.js` (`p5.Oscillator`, `p5.Noise` e filtros), sem dependência de ficheiros externos: música ambiente subaquática em *loop*, som suave de jato de água sob pressão e efeitos de feedback para coral limpo, vitória e derrota.
+- Realizei a manutenção do projeto: eliminei código não utilizado (`limiteMaximo` em `sketch.js` e `_vGradientRect()` em `Assets.js`), adicionei comentários descritivos nos ficheiros do código (`sketch.js`, `UI.js`, `Dirt.js`, `player.js` e `index.html`), atualizei o `README.md` com as regras e tempos reais, e validei a sintaxe via `node --check`.
+
+**Problemas:**
+- A sobrepressão do jato estava a retirar saúde demasiado rápido ($12\text{ pts/s}$), inviabilizando manter a saúde acima dos 50%.
+- O texto "Saúde: 100%" ficava cortado na extremidade direita do HUD e a moeda no ecrã de resultados sobrepunha-se à palavra "Ganhaste" e "Tesouro".
+- O ecrã de Vitória Final apresentava tipografia ilegível devido ao stroke duplo espesso em tom amarelo.
+- Os *upgrades* comprados aumentavam a área de limpeza no código, mas o raio do círculo no cursor e a barra verde do medidor permaneciam com os tamanhos padrão.
+- O navegador bloqueava a reprodução de áudio automático antes de qualquer interação do utilizador na página.
+
+**Solução:**
+- Reduzi a taxa de dano por sobrepressão para $4,5\text{ pts/s}$ calculados com base no tempo decorrido entre quadros (*delta-time*).
+- Reorganizei as margens do HUD e criei a função `desenhaTextoComMoeda()` para medir e centralizar geometricamente o conjunto de moeda e frase antes do desenho.
+- Apliquei `noStroke()` nos textos informativos e de vitória e reposicionei a moeda estritamente antes do texto.
+- Passei o valor recalculado do raio de alcance e os limites dinâmicos da faixa ideal para a renderização do bocal (`player.js`) e do medidor (`UI.js`).
+- Associei o arranque e desbloqueio do contexto de áudio do `p5.sound` à primeira interação de clique ou toque em qualquer ponto da aplicação.
+
+**Decisões:**
+- Tornar o ecossistema educativo mais rigoroso ao penalizar o dano aos corais com perda de recompensa e ao exigir 100% de restauração para desbloquear os níveis.
+- Gerar todo o sistema áudio e musical procedimentalmente por código em vez de carregar ficheiros MP3/WAV externos, mantendo a coerência com a abordagem procedural do projeto.
+- Manter as posições de calibração guardadas no browser via `localStorage` sem resetar as moedas ou *upgrades* ao recalibrar manualmente.
+- Facilitar ligeiramente a taxa base de limpeza e os fatores de resistência nos níveis 4 e 5 para garantir que o jogo seja desafiante, mas 100% possível de concluir com os *upgrades* no máximo.
+
+**Utilização de IA:**
+- Ferramenta: Gemini e Copilot.
+- Finalidade: Apoio na restruturação das funções de renderização do HUD/modais, criação dos osciladores e ruído rosa no `p5.sound.js`, revisão de acessibilidade do `localStorage`, funções de alinhamento de texto/moeda e auditoria de código sem uso.
+- Resultado utilizado: Lógica da máquina de áudio sintetizada, função auxiliar `desenhaTextoComMoeda()`, regras de layout dos modais e estrutura do `README.md` revisto.
+- Decisões minhas: Definir a curva de dificuldade final do Nível 5, aprovar as paletas e remoções de contorno da UI, estipular a taxa de dano de $4,5\text{ pts/s}$ e decidir a estrutura de comentários e limpeza do repositório.
