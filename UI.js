@@ -394,8 +394,7 @@ function desenhaMedidorMicrofone(volAtual, tolMin = faixaIdealMin, tolMax = faix
   text("Micro", x + larg / 2, y + alt + 8);
 }
 
-function desenhaRecompensaPartida(y, tamanhoTexto) {
-  let frase = `Ganhaste ${moedasGanhasNaPartida} moedas nesta partida`;
+function desenhaTextoComMoeda(frase, y, tamanhoTexto, corTexto) {
   let diametroMoeda = 28;
   let espaco = 8;
   textSize(tamanhoTexto);
@@ -405,10 +404,19 @@ function desenhaRecompensaPartida(y, tamanhoTexto) {
 
   drawGoldCoin(inicio + diametroMoeda / 2, y, diametroMoeda / 2);
   noStroke();
-  fill(255, 215, 0);
+  fill(corTexto);
   textAlign(LEFT, CENTER);
   text(frase, inicio + diametroMoeda + espaco, y);
   textAlign(CENTER, CENTER);
+}
+
+function desenhaRecompensaPartida(y, tamanhoTexto) {
+  desenhaTextoComMoeda(
+    `Ganhaste ${moedasGanhasNaPartida} moedas nesta partida`,
+    y,
+    tamanhoTexto,
+    color(255, 215, 0)
+  );
 }
 
 // ECRÃ DE FIM DE NÍVEL (RESULTADOS & RECOMPENSA)
@@ -650,28 +658,36 @@ function desenhaVitoriaFinal() {
   textSize(34);
   text("🏆 PARABÉNS! 🏆", width / 2, height / 2 - 110);
 
+  noStroke();
   fill(255);
   textSize(22);
   text("Completou com sucesso todos os níveis!", width / 2, height / 2 - 50);
 
   textSize(16);
-  fill(180, 230, 255);
+  fill(255);
   text("O recife de corais está totalmente limpo e restaurado.", width / 2, height / 2 - 15);
 
-  fill(255, 215, 0);
-  textSize(17);
-  text(`Ganhaste ${moedasGanhasNaPartida} moedas nesta partida`, width / 2, height / 2 + 10);
+  desenhaTextoComMoeda(
+    `Ganhaste ${moedasGanhasNaPartida} moedas nesta partida`,
+    height / 2 + 12,
+    17,
+    color(255, 215, 0)
+  );
 
   // Exibe o Tesouro Total Acumulado
-  drawGoldCoin(width / 2 - 80, height / 2 + 45, 14);
-  fill(255, 215, 0);
-  textSize(22);
-  text(`Tesouro Total: ${moedas} Moedas`, width / 2 + 20, height / 2 + 45);
+  desenhaTextoComMoeda(
+    `Tesouro Total: ${moedas} Moedas`,
+    height / 2 + 48,
+    22,
+    color(255, 215, 0)
+  );
 
+  noStroke();
   fill(saudeRecife < 50 ? color(255, 100, 100) : color(190, 230, 255));
   textSize(15);
   text(`Saúde do recife: ${saudeRecife.toFixed(0)}%`, width / 2, height / 2 + 72);
   if (saudeRecife < 50) {
+    noStroke();
     fill(255, 100, 100);
     textSize(14);
     text("Sem moedas neste nível: o recife ficou com menos de 50% de saúde.", width / 2, height / 2 + 94);

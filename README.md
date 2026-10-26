@@ -24,6 +24,8 @@ O jogador restaura um recife de coral degradado e branqueado, removendo algas, s
 - As moedas servem para melhorar a ferramenta na loja: Jato Mais Largo e Tolerância de Pressão têm cinco níveis cada.
 - A saúde perde 4,5 pontos por segundo durante a sobrepressão. A limpeza ideal usa taxa base 0,075; os fatores de resistência são 0,8, 1,2, 1,6, 1,85 e 2,15, do nível 1 ao 5.
 - O jato visual e o medidor de pressão refletem os upgrades. A seleção de níveis, quando aberta durante uma partida, permite retomá-la com o tempo e o progresso preservados ou regressar ao menu.
+- Após a primeira ativação do áudio, o jogo reproduz uma música subaquática sintetizada em contínuo; um som de jato mais baixo toca sempre que o jato está ativo, seja a pressão ideal ou excessiva.
+- A música é uma melodia original, sintetizada com osciladores p5.sound. Sons curtos assinalam a limpeza completa de cada coral, a conclusão de um nível a 100% e a derrota por tempo esgotado.
 - **Objetivo final:** completar o nível 5 com 100% de limpeza.
 
 ## Funcionalidades planeadas

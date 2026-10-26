@@ -12,6 +12,21 @@ let somaRuido = 0;
 let amostrasRuido = 0;
 let avisoCalibracao = "";
 let origemCalibracao = "jogar";
+let notaMusica;
+let notaBaixo;
+let filtroMusica;
+let filtroBaixo;
+let somJato;
+let filtroJato;
+let somFeedback;
+let filtroFeedback;
+let audioAmbienteIniciado = false;
+let jatoSonoroAtivo = false;
+let inicioMusica = 0;
+let passoMusicaAtual = -1;
+let filaFeedback = [];
+let indiceFeedback = 0;
+let proximoFeedbackEm = 0;
 
 // Limiares de Pressão
 let limiteMinimo = 0.05;
@@ -51,6 +66,29 @@ function setup() {
   createCanvas(800, 600);
   mic = new p5.AudioIn();
   limpador = new Limpador();
+
+  notaMusica = new p5.Oscillator("sine");
+  filtroMusica = new p5.LowPass();
+  filtroMusica.process(notaMusica, 1500);
+  notaMusica.amp(0);
+
+  notaBaixo = new p5.Oscillator("sine");
+  filtroBaixo = new p5.LowPass();
+  filtroBaixo.process(notaBaixo, 450);
+  notaBaixo.amp(0);
+
+  somJato = new p5.Noise("pink");
+  filtroJato = new p5.LowPass();
+  filtroJato.process(somJato, 850);
+  somJato.amp(0);
+
+  somFeedback = new p5.Oscillator("triangle");
+  filtroFeedback = new p5.LowPass();
+  filtroFeedback.process(somFeedback, 1800);
+  somFeedback.amp(0);
+
+  iniciaFontesAudio();
+  document.addEventListener("pointerdown", ativaAudioJogo, { once: true });
 }
 
 function draw() {
@@ -74,7 +112,112 @@ function draw() {
     desenhaGameOver();
   }
 
+  if (estado !== "execucao") {
+    atualizaSomJato(false);
+  }
+  atualizaMusicaFundo();
+  processaFeedbackAudio();
   desenhaRodape();
+}
+
+function ativaAudioJogo() {
+  userStartAudio();
+  iniciaFontesAudio();
+}
+
+function iniciaFontesAudio() {
+  if (!audioAmbienteIniciado) {
+    notaMusica.start();
+    notaBaixo.start();
+    somJato.start();
+    somFeedback.start();
+    inicioMusica = millis();
+    audioAmbienteIniciado = true;
+  }
+}
+
+function atualizaMusicaFundo() {
+  if (!audioAmbienteIniciado) return;
+
+  const melodia = [659.25, 0, 783.99, 987.77, 0, 783.99, 659.25, 523.25,
+    587.33, 0, 659.25, 783.99, 0, 659.25, 587.33, 523.25];
+  const baixos = [196, 0, 0, 0, 146.83, 0, 0, 0, 164.81, 0, 0, 0, 130.81, 0, 0, 0];
+  const duracaoPasso = 360;
+  const passo = floor((millis() - inicioMusica) / duracaoPasso) % melodia.length;
+  if (passo === passoMusicaAtual) return;
+
+  passoMusicaAtual = passo;
+  let frequencia = melodia[passo];
+  if (frequencia > 0) {
+    notaMusica.freq(frequencia, 0.04);
+    notaMusica.amp(0.075, 0.035);
+  } else {
+    notaMusica.amp(0, 0.06);
+  }
+
+  if (passo % 4 === 0) {
+    notaBaixo.freq(baixos[passo], 0.08);
+    notaBaixo.amp(0.045, 0.08);
+  }
+}
+
+function atualizaSomJato(ativo) {
+  if (!audioAmbienteIniciado || ativo === jatoSonoroAtivo) return;
+
+  somJato.amp(ativo ? 0.035 : 0, ativo ? 0.12 : 0.2);
+  jatoSonoroAtivo = ativo;
+}
+
+function tocaSequenciaFeedback(notas) {
+  if (!audioAmbienteIniciado) return;
+  filaFeedback = notas;
+  indiceFeedback = 0;
+  proximoFeedbackEm = millis();
+}
+
+function processaFeedbackAudio() {
+  if (!audioAmbienteIniciado || filaFeedback.length === 0) return;
+  if (millis() < proximoFeedbackEm) return;
+
+  if (indiceFeedback >= filaFeedback.length) {
+    somFeedback.amp(0, 0.12);
+    filaFeedback = [];
+    return;
+  }
+
+  let nota = filaFeedback[indiceFeedback++];
+  if (nota.frequencia > 0) {
+    somFeedback.freq(nota.frequencia, 0.015);
+    somFeedback.amp(nota.volume, 0.015);
+  } else {
+    somFeedback.amp(0, 0.015);
+  }
+  proximoFeedbackEm = millis() + nota.duracao;
+}
+
+function tocaSomCoralLimpo() {
+  tocaSequenciaFeedback([
+    { frequencia: 880, duracao: 75, volume: 0.08 },
+    { frequencia: 1174.66, duracao: 85, volume: 0.07 },
+    { frequencia: 1567.98, duracao: 150, volume: 0.06 }
+  ]);
+}
+
+function tocaSomNivelConcluido(sucesso) {
+  if (sucesso) {
+    tocaSequenciaFeedback([
+      { frequencia: 523.25, duracao: 120, volume: 0.09 },
+      { frequencia: 659.25, duracao: 120, volume: 0.09 },
+      { frequencia: 783.99, duracao: 120, volume: 0.09 },
+      { frequencia: 1046.5, duracao: 260, volume: 0.085 }
+    ]);
+  } else {
+    tocaSequenciaFeedback([
+      { frequencia: 392, duracao: 150, volume: 0.07 },
+      { frequencia: 311.13, duracao: 160, volume: 0.07 },
+      { frequencia: 233.08, duracao: 260, volume: 0.06 }
+    ]);
+  }
 }
 
 function iniciaNivel(numNivel) {
@@ -127,6 +270,9 @@ function executaJogo() {
   let pressaoExcessiva = vol >= limiteMinimo && vol > tolMax;
 
   let sujidadeRestante = 0;
+  let coraisSujosAntes = posicoesCorais.map((_, idCoral) =>
+    listaSujidade.some(m => m.idCoral === idCoral && !m.limpa)
+  );
 
   for (let m of listaSujidade) {
     if (!tabelaRecompensasAberta && vol >= limiteMinimo && !pressaoExcessiva) {
@@ -140,6 +286,13 @@ function executaJogo() {
     }
   }
 
+  for (let i = 0; i < coraisSujosAntes.length; i++) {
+    let aindaSujo = listaSujidade.some(m => m.idCoral === i && !m.limpa);
+    if (coraisSujosAntes[i] && !aindaSujo) {
+      tocaSomCoralLimpo();
+    }
+  }
+
   // Atualiza percentagem limpa
   if (totalSujidadeInicial > 0) {
     let limpo = totalSujidadeInicial - sujidadeRestante;
@@ -149,6 +302,7 @@ function executaJogo() {
   if (!tabelaRecompensasAberta && pressaoExcessiva) {
     saudeRecife = max(0, saudeRecife - 4.5 * deltaTime / 1000);
   }
+  atualizaSomJato(!tabelaRecompensasAberta && vol >= limiteMinimo);
 
   limpador.desenha(tolMin, tolMax, raioJato);
 
@@ -170,6 +324,7 @@ function executaJogo() {
 }
 
 function concluiNivel(sucesso) {
+  tocaSomNivelConcluido(sucesso);
   moedasGanhasNaPartida = 0;
   if (saudeRecife >= 50) {
     if (percentagemLimpa >= 100) {
@@ -306,7 +461,7 @@ function carregaCalibracao() {
 }
 
 function iniciaCalibracao() {
-  userStartAudio();
+  ativaAudioJogo();
   mic.start();
   somaRuido = 0;
   amostrasRuido = 0;
@@ -320,7 +475,7 @@ function mousePressed() {
     // Botão "Jogar"
     if (mouseX > width / 2 - 140 && mouseX < width / 2 + 140 &&
         mouseY > 385 && mouseY < 435) {
-      userStartAudio();
+      ativaAudioJogo();
       mic.start();
       if (carregaCalibracao()) {
         iniciaNivel(1);
@@ -355,7 +510,7 @@ function mousePressed() {
       // Deteta o clique em cada cartão de nível
       if (mouseX > bx - 45 && mouseX < bx + 45 && mouseY > by - 40 && mouseY < by + 40) {
         if (i <= nivelMaximoDesbloqueado) {
-          userStartAudio();
+          ativaAudioJogo();
           mic.start();
           iniciaNivel(i); // Inicia o nível escolhido
         }
